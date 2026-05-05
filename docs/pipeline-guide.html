@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pivot/TBL Re-Rates Pipeline Guide — vNext (February 2026)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg-deep: #0a0e17;
+    --bg-surface: #111827;
+    --bg-card: #1a2236;
+    --bg-elevated: #1f2a42;
+    --border: #2a3654;
+    --border-accent: #3b82f6;
+    --text-primary: #e8ecf4;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --gradient-hero: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1a1033 100%);
+    --gradient-accent: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --font-display: 'Outfit', system-ui, sans-serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+    --shadow-glow: 0 0 30px rgba(59,130,246,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    line-height: 1.7;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ═══════════════════════════════════════ */
+  /*  NAVIGATION                            */
+  /* ═══════════════════════════════════════ */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,14,23,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transition: box-shadow 0.3s;
+  }
+  .nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .nav-brand {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1.1rem;
+    color: var(--text-primary);
+    display: flex; align-items: center; gap: 0.5rem;
+    text-decoration: none;
+  }
+  .nav-brand .badge {
+    font-size: 0.65rem; font-weight: 600;
+    background: var(--gradient-accent);
+    color: white; padding: 2px 8px; border-radius: 20px;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex; gap: 0.25rem; list-style: none;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a {
+    font-family: var(--font-display);
+    font-size: 0.8rem; font-weight: 500;
+    color: var(--text-muted); text-decoration: none;
+    padding: 0.4rem 0.75rem; border-radius: 6px;
+    white-space: nowrap; transition: all 0.2s;
+  }
+  .nav-links a:hover { color: var(--text-primary); background: var(--bg-card); }
+  .nav-links a.active { color: var(--accent-blue); background: rgba(59,130,246,0.1); }
+
+  .nav-toggle {
+    display: none; background: none; border: none; color: var(--text-primary);
+    font-size: 1.5rem; cursor: pointer;
+  }
+
+  @media (max-width: 900px) {
+    .nav-toggle { display: block; }
+    .nav-links {
+      display: none; position: absolute; top: 64px; left: 0; right: 0;
+      background: var(--bg-surface); border-bottom: 1px solid var(--border);
+      flex-direction: column; padding: 1rem;
+    }
+    .nav-links.open { display: flex; }
+  }
+
+  /* ═══════════════════════════════════════ */
+  /*  HERO                                  */
+  /* ═══════════════════════════════════════ */
+  .hero {
+    background: var(--gradient-hero);
+    padding: 8rem 2rem 5rem;
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(59,130,246,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, rgba(6,182,212,0.06) 0%, transparent 50%);
+  }
+  .hero::after {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-inner {
+    max-width: 1200px; margin: 0 auto; position: relative; z-index: 1;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono); font-size: 0.8rem;
+    color: var(--accent-cyan); letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 40px; height: 2px;
+    background: var(--gradient-accent);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800; line-height: 1.1;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #e8ecf4 0%, #94a3b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-subtitle {
+    font-size: 1.15rem; line-height: 1.7;
+    color: var(--text-secondary);
+    max-width: 700px; margin-bottom: 2.5rem;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+  }
+  .hero-stat {
+    text-align: left;
+  }
+  .hero-stat-value {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 700;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-stat-label {
+    font-family: var(--font-display);
+    font-size: 0.75rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  /* ═══════════════════════════════════════ */
+  /*  MAIN CONTENT                          */
+  /* ═══════════════════════════════════════ */
+  .content { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid rgba(42,54,84,0.5);
+  }
+  section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--accent-cyan); letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-label::before {
+    content: ''; width: 24px; height: 2px;
+    background: var(--accent-cyan);
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 700;
+    margin-bottom: 1.5rem; line-height: 1.2;
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 1.35rem; font-weight: 600;
+    margin: 2rem 0 1rem; color: var(--text-primary);
+  }
+
+  h4 {
+    font-family: var(--font-display);
+    font-size: 1.05rem; font-weight: 600;
+    margin: 1.5rem 0 0.75rem; color: var(--accent-cyan);
+  }
+
+  p { margin-bottom: 1rem; color: var(--text-secondary); }
+  p + p { margin-top: 0; }
+
+  strong { color: var(--text-primary); font-weight: 600; }
+
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ═══════════════════════════════════════ */
+  /*  CARDS & BOXES                         */
+  /* ═══════════════════════════════════════ */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-card);
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem; margin: 1.5rem 0;
+  }
+  .card-grid .card { margin-bottom: 0; }
+
+  .card-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .card-icon.blue { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .card-icon.cyan { background: rgba(6,182,212,0.15); color: var(--accent-cyan); }
+  .card-icon.emerald { background: rgba(16,185,129,0.15); color: var(--accent-emerald); }
+  .card-icon.amber { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+  .card-icon.purple { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+  .card-icon.red { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+  .card-icon.pink { background: rgba(236,72,153,0.15); color: var(--accent-pink); }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 1.05rem;
+  }
+  .card p:last-child { margin-bottom: 0; }
+
+  .callout {
+    background: var(--bg-elevated);
+    border-left: 3px solid var(--accent-blue);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+  }
+  .callout.warn { border-left-color: var(--accent-amber); }
+  .callout.success { border-left-color: var(--accent-emerald); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-label {
+    font-family: var(--font-display);
+    font-size: 0.8rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .callout .callout-label { color: var(--accent-blue); }
+  .callout.warn .callout-label { color: var(--accent-amber); }
+  .callout.success .callout-label { color: var(--accent-emerald); }
+
+  /* ═══════════════════════════════════════ */
+  /*  FORMULA BLOCKS                        */
+  /* ═══════════════════════════════════════ */
+  .formula-block {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem; margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+  .formula-label {
+    font-family: var(--font-display);
+    font-size: 0.75rem; font-weight: 600;
+    color: var(--accent-purple);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+  }
+  .formula {
+    font-family: var(--font-mono);
+    font-size: 0.9rem; line-height: 1.8;
+    color: var(--accent-cyan);
+    white-space: pre-wrap;
+  }
+  .formula .comment {
+    color: var(--text-muted); font-style: italic;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-elevated);
+    padding: 0.15em 0.4em; border-radius: 4px;
+    color: var(--accent-cyan);
+  }
+
+  /* ═══════════════════════════════════════ */
+  /*  PIPELINE DIAGRAM                      */
+  /* ═══════════════════════════════════════ */
+  .pipeline-diagram {
+    display: flex; flex-direction: column;
+    gap: 0; margin: 2rem 0;
+    position: relative;
+  }
+  .pipeline-track {
+    margin-bottom: 2rem;
+  }
+  .pipeline-track-label {
+    font-family: var(--font-display);
+    font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    padding: 0.3rem 0.75rem; border-radius: 20px;
+    display: inline-block; margin-bottom: 1rem;
+  }
+  .pipeline-track-label.nhl { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .pipeline-track-label.ahl { background: rgba(16,185,129,0.15); color: var(--accent-emerald); }
+  .pipeline-track-label.final { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+
+  .pipeline-steps {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    align-items: center;
+  }
+  .pipeline-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 1rem;
+    font-family: var(--font-display);
+    font-size: 0.8rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .pipeline-step:hover {
+    border-color: var(--accent-blue);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+  }
+  .pipeline-step.new {
+    border-color: var(--accent-emerald);
+    background: rgba(16,185,129,0.08);
+  }
+  .pipeline-step.new::after {
+    content: 'NEW'; font-size: 0.55rem; font-weight: 700;
+    color: var(--accent-emerald);
+    margin-left: 0.4rem; vertical-align: super;
+  }
+  .pipeline-arrow {
+    color: var(--text-muted); font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  /* ═══════════════════════════════════════ */
+  /*  DATA SOURCE TABLE                     */
+  /* ═══════════════════════════════════════ */
+  .source-table {
+    width: 100%; border-collapse: collapse;
+    margin: 1.5rem 0; font-size: 0.9rem;
+  }
+  .source-table th {
+    font-family: var(--font-display);
+    font-size: 0.75rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-align: left; padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .source-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(42,54,84,0.4);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  .source-table tr:hover td {
+    background: rgba(59,130,246,0.03);
+  }
+  .source-table .source-name {
+    font-family: var(--font-display);
+    font-weight: 600; color: var(--text-primary);
+  }
+  .source-tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; font-weight: 600;
+    padding: 2px 6px; border-radius: 4px;
+    display: inline-block; margin-right: 0.25rem;
+  }
+  .source-tag.skater { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .source-tag.goalie { background: rgba(236,72,153,0.15); color: var(--accent-pink); }
+  .source-tag.both { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+
+  /* ═══════════════════════════════════════ */
+  /*  PHASE CARDS (expandable)              */
+  /* ═══════════════════════════════════════ */
+  .phase-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .phase-section:hover { border-color: rgba(59,130,246,0.3); }
+  .phase-section.open { border-color: var(--accent-blue); }
+
+  .phase-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.25rem 1.75rem;
+    cursor: pointer; user-select: none;
+    transition: background 0.2s;
+  }
+  .phase-header:hover { background: rgba(59,130,246,0.03); }
+
+  .phase-number {
+    font-family: var(--font-display);
+    font-size: 0.7rem; font-weight: 700;
+    color: var(--accent-blue);
+    background: rgba(59,130,246,0.1);
+    padding: 0.25rem 0.6rem; border-radius: 6px;
+    white-space: nowrap;
+  }
+  .phase-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem; font-weight: 600;
+    flex: 1;
+  }
+  .phase-attrs {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; color: var(--text-muted);
+    display: none;
+  }
+  @media (min-width: 768px) { .phase-attrs { display: block; } }
+
+  .phase-chevron {
+    color: var(--text-muted); font-size: 1.2rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .phase-section.open .phase-chevron { transform: rotate(180deg); }
+
+  .phase-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .phase-section.open .phase-body { max-height: 8000px; }
+  .phase-content {
+    padding: 0 1.75rem 1.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .eli5 {
+    background: rgba(6,182,212,0.06);
+    border: 1px solid rgba(6,182,212,0.15);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem 1.5rem; margin: 1.25rem 0;
+  }
+  .eli5-label {
+    font-family: var(--font-display);
+    font-size: 0.7rem; font-weight: 700;
+    color: var(--accent-cyan);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .eli5 p { margin-bottom: 0; color: var(--text-secondary); }
+
+  /* Attribute pills */
+  .attr-pill {
+    font-family: var(--font-mono);
+    font-size: 0.75rem; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+    display: inline-block; margin: 0.15rem;
+  }
+  .attr-pill.key { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .attr-pill.essential { background: rgba(139,92,246,0.12); color: var(--accent-purple); }
+  .attr-pill.modeled { background: rgba(16,185,129,0.12); color: var(--accent-emerald); }
+
+  /* Signal list */
+  .signal-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.5rem; margin: 1rem 0;
+  }
+  .signal-item {
+    font-size: 0.85rem; color: var(--text-secondary);
+    padding: 0.4rem 0;
+    display: flex; align-items: flex-start; gap: 0.5rem;
+  }
+  .signal-item::before {
+    content: '→'; color: var(--accent-cyan);
+    font-family: var(--font-mono); font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════ */
+  /*  TIER TABLE                            */
+  /* ═══════════════════════════════════════ */
+  .tier-table {
+    width: 100%; border-collapse: collapse;
+    margin: 1.5rem 0; font-size: 0.85rem;
+  }
+  .tier-table th {
+    font-family: var(--font-display);
+    font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted); text-align: left;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .tier-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid rgba(42,54,84,0.3);
+  }
+  .tier-bar {
+    height: 6px; border-radius: 3px;
+    background: var(--border);
+    position: relative; overflow: hidden;
+  }
+  .tier-bar-fill {
+    height: 100%; border-radius: 3px;
+    position: absolute; left: 0; top: 0;
+  }
+
+  /* ═══════════════════════════════════════ */
+  /*  FOOTER                                */
+  /* ═══════════════════════════════════════ */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  .footer a { color: var(--text-secondary); }
+
+  /* ═══════════════════════════════════════ */
+  /*  UTILITIES                             */
+  /* ═══════════════════════════════════════ */
+  .mt-2 { margin-top: 2rem; }
+  .mb-1 { margin-bottom: 1rem; }
+  .text-muted { color: var(--text-muted); }
+  .text-sm { font-size: 0.85rem; }
+  .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+
+  .weight-bar {
+    display: flex; border-radius: 6px; overflow: hidden;
+    height: 28px; margin: 1rem 0; font-size: 0.65rem;
+    font-family: var(--font-mono); font-weight: 600;
+  }
+  .weight-bar > span {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 0.5rem; white-space: nowrap; min-width: 0;
+    transition: flex 0.3s;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  NAVIGATION                                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">
+      Pivot/TBL Re-Rates <span class="badge">vNext</span>
+    </a>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">☰</button>
+    <ul class="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#pipeline">Pipeline</a></li>
+      <li><a href="#data-sources">Data</a></li>
+      <li><a href="#phases">Phases</a></li>
+      <li><a href="#ca-tiers">CA Tiers</a></li>
+      <li><a href="#roles">Roles</a></li>
+      <li><a href="#merge">Merge</a></li>
+      <li><a href="#ahl">AHL</a></li>
+      <li><a href="#utilities">Tools</a></li>
+      <li><a href="#draft-classes">Drafts</a></li>
+      <li><a href="#limitations">Roadmap</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  HERO                                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Pipeline Documentation</div>
+    <h1>Pivot/TBL Re-Rates<br>Pipeline Guide</h1>
+    <p class="hero-subtitle">
+      A comprehensive look at how over 60 real-world data sources are transformed into analytically-grounded player ratings for Eastside Hockey Manager. Built for transparency, designed for the community.
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value">1,675</div>
+        <div class="hero-stat-label">Players Rated</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">20+</div>
+        <div class="hero-stat-label">Data Sources</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">10</div>
+        <div class="hero-stat-label">Modeling Phases</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">27,800+</div>
+        <div class="hero-stat-label">Lines of Code</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: OVERVIEW                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="overview">
+  <div class="section-label">Section 01</div>
+  <h2>What This Is &amp; Why It Exists</h2>
+
+  <p>For years, EHM database attribute updates were done by hand. Ratings were subjective, best-effort, and not evenly grounded to data. The Re-Rates pipeline changes that by leveraging the same rich analytics that NHL front offices use — expected goals models, isolated impact metrics, tracking data, and WAR-style value frameworks — to produce player ratings that reflect what's actually happening on the ice.</p>
+
+  <p>The pipeline takes raw statistical data from sources like MoneyPuck, Evolving Hockey, NHL EDGE tracking, LB Hockey, HockeyStatCards, and more, then transforms it through a series of modeling phases that each handle a specific domain of hockey ability. The result is a complete set of EHM attribute ratings for every NHL and AHL player with sufficient data — ratings that can be explained and defended with evidence rather than gut feel.</p>
+
+  <p>This is the <strong>vNext</strong> release, built during the February 2026 Olympic break. It represents the most significant overhaul to the pipeline since its inception — every script was audited, refactored, and improved, with two entirely new modeling phases added and the data foundation expanded dramatically.</p>
+
+  <div class="callout">
+    <div class="callout-label">AI Disclosure</div>
+    <p>This project was created with the assistance of AI (originally ChatGPT, now Claude by Anthropic). All scripting, mathematical modeling, and much of this documentation was AI-assisted. The human (xECK29x) provided project oversight, hockey expertise, design direction, and validation throughout. AI is a powerful tool, but it requires deep domain knowledge to guide — it will make assumptions, hit boundaries, and needs constant course correction. The hockey knowledge driving every design decision is human.</p>
+  </div>
+
+  <h3>Design Principles</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon blue">📊</div>
+        <div class="card-title">Analytics First, Hockey Always</div>
+      </div>
+      <p>Ratings are driven by data, but every formula was designed with hockey knowledge. A shutdown defenseman who suppresses chances gets rewarded even if he doesn't rack up blocked shots. A fourth-liner trusted by his coaching staff gets a deployment floor even if his shot metrics are modest.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon cyan">⚖️</div>
+        <div class="card-title">Rates Over Totals</div>
+      </div>
+      <p>The pipeline overwhelmingly prefers per-60 and per-game rate metrics over raw counting stats. A player who missed 20 games to injury shouldn't be penalized for lower totals — their per-minute impact is what matters for EHM ratings.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon emerald">🛡️</div>
+        <div class="card-title">Conservative by Default</div>
+      </div>
+      <p>Extreme ratings (1–3 or 18–20) should be rare and earned. The pipeline uses reliability weighting, Bayesian shrinkage, and PA-gated elite tail boosts to ensure only truly elite or truly deficient players hit the extremes.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon amber">🔍</div>
+        <div class="card-title">Transparent &amp; Auditable</div>
+      </div>
+      <p>Every modeling decision can be traced to specific data signals with specific weights. The pipeline generates QA viewers, distribution reports, and per-player decision logs. This documentation exists so anyone can challenge or improve the methodology.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: PIPELINE ARCHITECTURE                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="pipeline">
+  <div class="section-label">Section 02</div>
+  <h2>Pipeline Architecture</h2>
+
+  <p>The pipeline runs in two parallel tracks — NHL and AHL — that merge at the end into a single combined database. Each track follows the same principle: collect data, build a master file, then run a series of modeling phases that each handle a specific domain of hockey skill. The full pipeline spans 24 Python scripts totaling nearly 28,000 lines of code.</p>
+
+  <div class="eli5">
+    <div class="eli5-label">The Simple Version</div>
+    <p>Think of it like an assembly line. Raw data goes in one end. Each station on the line adds one type of rating — physicality, defense, skating, offense, faceoffs, goaltending. At the end, a quality inspector (Phase 8) checks the overall picture and suggests whether the player's CA needs adjusting. Then the NHL and AHL lines merge into one database.</p>
+  </div>
+
+  <h3>NHL Track</h3>
+  <div class="pipeline-diagram">
+    <div class="pipeline-track">
+      <span class="pipeline-track-label nhl">NHL Pipeline</span>
+      <div class="pipeline-steps">
+        <div class="pipeline-step" onclick="scrollToPhase('edge')">EDGE Collection</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step" onclick="scrollToPhase('build')">Master Build</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step" onclick="scrollToPhase('p2')">Phase 2: Physicality</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step" onclick="scrollToPhase('p3')">Phase 3: Defense</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step" onclick="scrollToPhase('p4')">Phase 4: Skating</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step" onclick="scrollToPhase('p5')">Phase 5: Offense &amp; Cognition</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step new" onclick="scrollToPhase('p5b')">Phase 5b: Career Mentals</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step" onclick="scrollToPhase('p6')">Phase 6: Faceoffs</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step" onclick="scrollToPhase('p7')">Phase 7: Goalies</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step new" onclick="scrollToPhase('p7b')">Phase 7b: Goalie Mentals</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step new" onclick="scrollToPhase('p8')">Phase 8: CA &amp; Roles</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>AHL Track</h3>
+  <div class="pipeline-diagram">
+    <div class="pipeline-track">
+      <span class="pipeline-track-label ahl">AHL Pipeline</span>
+      <div class="pipeline-steps">
+        <div class="pipeline-step">AHL Master Build</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step">AHL Skaters Model</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step">AHL Goalies Model</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step new">AHL Phase 3: CA &amp; Roles</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Final Merge</h3>
+  <div class="pipeline-diagram">
+    <div class="pipeline-track">
+      <span class="pipeline-track-label final">Final Output</span>
+      <div class="pipeline-steps">
+        <div class="pipeline-step">NHL Modeled Master</div>
+        <span class="pipeline-arrow">+</span>
+        <div class="pipeline-step">AHL Modeled Master</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step new" onclick="scrollToSection('merge')">Quality-Preferred Merge</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step">Combined Database (1,675 players)</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Shared Mathematical Foundations</h3>
+  <p>Every modeling phase in the pipeline shares a common set of mathematical tools. Understanding these once will help you follow the logic in any phase.</p>
+
+  <div class="card">
+    <h4>Per-60 Rate Conversion</h4>
+    <p>Raw counting stats are converted to rates per 60 minutes of ice time. This prevents ice-time bias — a first-liner who plays 22 minutes per game and a fourth-liner who plays 8 minutes are compared on an equal footing.</p>
+    <div class="formula-block">
+      <div class="formula-label">Formula</div>
+      <div class="formula">value_per60 = (raw_count / TOI_minutes) × 60</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>Position-Group Z-Scoring</h4>
+    <p>Signals are standardized within position groups (forwards, defensemen, goalies separately). A defenseman's hit rate is compared to other defensemen, not to forwards. This produces a z-score: how many standard deviations a player is from the average at their position.</p>
+    <div class="formula-block">
+      <div class="formula-label">Formula</div>
+      <div class="formula">z = (player_value − position_mean) / position_std_dev</div>
+    </div>
+    <p class="text-sm text-muted">A z-score of +1.5 means the player is 1.5 standard deviations above average for their position group. A z-score of 0 means exactly average.</p>
+  </div>
+
+  <div class="card">
+    <h4>Reliability Weighting</h4>
+    <p>Players with small sample sizes (few games, low ice time) are "shrunk" toward a neutral average. This prevents a player who scored on his only shot attempt from getting a 20 Wristshot rating. The more ice time a player has, the more we trust the data.</p>
+    <div class="formula-block">
+      <div class="formula-label">Formula</div>
+      <div class="formula">reliability = (TOI / soft_threshold)^0.75  <span class="comment">// capped at 1.0</span>
+final_score = (reliability × data_score) + ((1 − reliability) × neutral_midpoint)</div>
+    </div>
+    <p class="text-sm text-muted">Soft thresholds: Forwards ~200 min, Defensemen ~300 min. Full trust: Forwards ~428 min, Defensemen ~604 min.</p>
+  </div>
+
+  <div class="card">
+    <h4>Normal-CDF Mapping (vNext Improvement)</h4>
+    <p>The old pipeline used percentile-rank mapping, which produced unrealistic "flat" distributions — roughly equal numbers of players at every rating from 1 to 20. The vNext pipeline uses z-score → normal CDF mapping, which creates natural bell curves. Most players cluster around 10–14, with very few earning extreme ratings.</p>
+    <div class="formula-block">
+      <div class="formula-label">Formula</div>
+      <div class="formula">percentile = Φ(z_score)  <span class="comment">// normal CDF</span>
+rating = round(1 + percentile × 19)  <span class="comment">// maps 0–1 to 1–20 scale</span></div>
+    </div>
+    <p class="text-sm text-muted">This is one of the most impactful vNext changes. It means an 18 rating is genuinely rare and represents truly elite performance, not just "top 15%."</p>
+  </div>
+
+  <div class="card">
+    <h4>Bayesian Shrinkage</h4>
+    <p>For percentage-based metrics (like shooting percentage by shot type), raw percentages from small samples are unreliable. Bayesian shrinkage blends the player's observed rate with the league average, weighted by sample size.</p>
+    <div class="formula-block">
+      <div class="formula-label">Formula</div>
+      <div class="formula">smoothed_pct = (player_goals + prior_rate × prior_shots) / (player_shots + prior_shots)
+<span class="comment">// More shots → player's own rate dominates</span>
+<span class="comment">// Fewer shots → pulls toward league average</span></div>
+    </div>
+    <p class="text-sm text-muted">Example: A player who scored 1 goal on 2 wrist shots (50%) is shrunk heavily toward the league average (~12%). A player who scored 15 on 120 (12.5%) barely moves.</p>
+  </div>
+
+  <div class="card">
+    <h4>Elite Tail Boost (PA-Gated)</h4>
+    <p>Franchise-level talents (PA ≥ 180) receive a gentle boost into the 17–20 range for key offensive and cognitive skills — but only if their data already shows above-average performance. This ensures McDavid and MacKinnon separate from very good players without inflating everyone.</p>
+    <div class="formula-block">
+      <div class="formula-label">Logic</div>
+      <div class="formula"><span class="comment">// Only applies to players already above average</span>
+<span class="comment">// Only applies to offensive-lean roles</span>
+<span class="comment">// Scales from PA 180 (partial) to PA 200 (full strength)</span>
+if PA ≥ 180 AND score > average AND role is offensive:
+  boost_strength = (PA − 180) / 20  <span class="comment">// 0.0 at 180, 1.0 at 200</span>
+  score += tail_boost × boost_strength</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: DATA SOURCES                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="data-sources">
+  <div class="section-label">Section 03</div>
+  <h2>Data Sources</h2>
+
+  <p>The vNext pipeline ingests data from <strong>20+ independent analytical sources</strong> across 60+ individual files. Each source brings something different to the table — some measure what a player does (counting stats), some measure how well they do it (expected goals models), some isolate their individual impact from their teammates (RAPM), and some provide direct physical measurements (EDGE tracking).</p>
+
+  <div class="callout success">
+    <div class="callout-label">vNext Change</div>
+    <p>The Natural Stat Trick dependency was fully eliminated in this release. All NST signals were replaced by equivalent or superior columns from MoneyPuck and Evolving Hockey, removing a redundant data layer and tightening the analytical foundation.</p>
+  </div>
+
+  <table class="source-table">
+    <thead>
+      <tr>
+        <th>Source</th>
+        <th>What It Provides</th>
+        <th>Columns</th>
+        <th>Feeds</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <span class="source-name">MoneyPuck</span><br>
+          <span class="source-tag both">Skaters + Goalies</span>
+        </td>
+        <td>Expected goals models (xGF, xGA, xG±), shot locations, rebound creation, on/off-ice differentials across 5v5, 5v4, and 4v5 strength states. Also provides raw shot-level event data for per-player xG aggregation and average shot distance.</td>
+        <td><strong>54+</strong></td>
+        <td>Phases 2–5, 7, 8</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">Evolving Hockey</span><br>
+          <span class="source-tag both">Skaters + Goalies</span>
+        </td>
+        <td>The deepest analytics ecosystem in the pipeline. Individual rates, on-ice rates, relative rates, score-venue adjusted rates — plus the full <strong>GAR</strong> (Goals Above Replacement), <strong>xGAR</strong> (expected GAR), and <strong>RAPM</strong> decompositions. RAPM isolates a player's individual impact from teammates, opponents, zone starts, and score state.</td>
+        <td><strong>67+</strong></td>
+        <td>Phases 2–5, 7, 8</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">NHL EDGE Tracking</span><br>
+          <span class="source-tag both">Skaters + Goalies</span>
+        </td>
+        <td>Real measured physical data from puck and player tracking cameras. Skating speeds (top speed, burst counts), skating distances (per shift, per game), shot speeds (release velocity), shot locations, zone time shares, and goalie-specific metrics (save % by shot location, lateral movement).</td>
+        <td><strong>6 categories</strong></td>
+        <td>Phases 4, 5, 7, 8</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">LB Hockey</span><br>
+          <span class="source-tag both">Skaters + Goalies</span>
+        </td>
+        <td>Graded context metrics including WAR components, Chance Suppression, Retrievals, D-Zone Pressure Mitigation, Transition play, Entry Volume, Puck Management, and Zone Offense/Defense ratings. Provides a "scouting-like" analytical layer that captures skills traditional stats miss.</td>
+        <td><strong>25+</strong></td>
+        <td>Phases 2–5, 7, 8</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">HockeyStatCards</span><br>
+          <span class="source-tag both">Skaters + Goalies</span>
+        </td>
+        <td>GameScore-based player ratings, offensive/defensive ratings, and usage data (zone starts, competition quality). Provides an independent composite view of player quality.</td>
+        <td><strong>15+</strong></td>
+        <td>Phases 5, 7, 8</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">NHL.com Statistics</span><br>
+          <span class="source-tag both">Skaters + Goalies</span>
+        </td>
+        <td>Official NHL data: penalties, faceoffs, miscellaneous stats (hits, blocks, takeaways, giveaways), shots by type, puck possession, goalie advanced stats, rest splits, saves by strength, shootout stats, and started vs. relieved data.</td>
+        <td><strong>~40</strong></td>
+        <td>Phases 2–7</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">Hockey ELO Ratings</span><br>
+          <span class="source-tag skater">Skaters</span>
+        </td>
+        <td>Faceoff-specific ELO ratings that account for opponent quality and situational context — a more sophisticated measure than raw faceoff win percentage.</td>
+        <td><strong>1</strong></td>
+        <td>Phase 6</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">Elite Prospects</span><br>
+          <span class="source-tag both">Skaters + Goalies</span>
+        </td>
+        <td>Scouting-intelligence style tags (Sniper, Playmaker, Power Forward, etc.) that provide an independent human observation layer on top of analytics. Used as soft supplemental signals for role suggestion.</td>
+        <td><strong>Tags</strong></td>
+        <td>Phase 8</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">AHLTracker</span><br>
+          <span class="source-tag both">AHL Only</span>
+        </td>
+        <td>The primary (and largely only) data source for AHL players. Provides scoring (5v5, PP), on-ice metrics (5v5, PP, SH), advanced stats, and penalties. More limited than the NHL data ecosystem — no xG models, no RAPM, no tracking data.</td>
+        <td><strong>~175</strong></td>
+        <td>AHL Pipeline</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="source-name">Career History</span><br>
+          <span class="source-tag both">Skaters + Goalies</span>
+        </td>
+        <td>Multi-year, multi-league career data from the EHM database export (~43,700 season records across 1,871 players). Provides playoff vs. regular season splits, season-to-season production variance, and career trajectory signals.</td>
+        <td><strong>Derived</strong></td>
+        <td>Phase 5b</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: MODELING PHASES                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="phases">
+  <div class="section-label">Section 04</div>
+  <h2>Modeling Phases</h2>
+
+  <p>Each phase is responsible for a specific domain of hockey skill. Phases run sequentially — each reads the output of the previous phase and adds its own <code>_model</code> columns. Click any phase to expand its details.</p>
+
+  <!-- ═══ PHASE 2: PHYSICALITY ═══ -->
+  <div class="phase-section" id="p2">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 2</span>
+      <span class="phase-title">Physicality</span>
+      <span class="phase-attrs">Hitting · Checking · Aggression · Fighting · Bravery · WorkRate · Strength · Balance</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 2 answers: <strong>"How does this player engage physically?"</strong> It measures behavioral tendencies — how often and how willingly a player hits, fights, plays through contact, and battles in front of the net. These aren't performance ratings (that's later phases) — they're about what type of game a player plays.</p>
+        </div>
+
+        <h4>Attributes Modeled</h4>
+        <p>
+          <span class="attr-pill modeled">Hitting</span>
+          <span class="attr-pill modeled">Checking</span>
+          <span class="attr-pill modeled">Aggression</span>
+          <span class="attr-pill modeled">Fighting</span>
+          <span class="attr-pill modeled">Bravery</span>
+          <span class="attr-pill modeled">WorkRate</span>
+          <span class="attr-pill modeled">Strength</span>
+          <span class="attr-pill modeled">Balance</span>
+        </p>
+
+        <h4>Key Data Signals</h4>
+        <div class="signal-list">
+          <div class="signal-item">NHL.com Hits/60 and Hits Taken/60</div>
+          <div class="signal-item">LB Hockey: Play Through Contact</div>
+          <div class="signal-item">LB Hockey: Net-Front Play grade</div>
+          <div class="signal-item">LB Hockey: Hits Absorbed/60</div>
+          <div class="signal-item">NHL.com Penalties (fighting majors, roughing)</div>
+          <div class="signal-item">Evolving Hockey RAPM net impact</div>
+          <div class="signal-item">MoneyPuck on-ice xG differential</div>
+          <div class="signal-item">BMI z-scores (for Strength and Balance)</div>
+          <div class="signal-item">LB Hockey: D-Zone Pressure Mitigation</div>
+        </div>
+
+        <h4>How It Works</h4>
+        <p>Every attribute follows the same pattern: select observable behavioral signals (events, not outcomes), convert to per-60 rates, normalize within position groups, apply reliability weighting, apply role-based context, then map to the 1–20 EHM scale with conservative bounds.</p>
+
+        <p><strong>Hitting</strong> is driven primarily by hit rates (Hits/60) — a pure frequency measure. A player who throws 10 hits per 60 minutes will rate higher than one who throws 3, regardless of their other skills. The formula also considers hits taken (players who absorb contact are typically physical players) and LB Hockey's Net-Front Play grade.</p>
+
+        <p><strong>Bravery</strong> received the biggest upgrade in vNext, with 26+ new signals from LB Hockey and Evolving Hockey. It now captures Play Through Contact (willingness to maintain puck control under pressure), Hits Absorbed/60 (absorbing contact rather than avoiding it), and D-Zone Pressure Mitigation. An NHL-wide lift constant was added to better reflect that simply playing in the NHL requires a baseline level of bravery.</p>
+
+        <p><strong>WorkRate</strong> combines engagement metrics (RAPM net impact, on-ice involvement) with effort signals. It's designed to capture the "motor" — players who are consistently engaged shift after shift.</p>
+
+        <p><strong>Strength</strong> and <strong>Balance</strong> are the only Phase 2 attributes with a physical measurement component — they use BMI z-scores calculated from actual player height and weight data. This is why the pipeline hard-fails if height/weight data is missing.</p>
+
+        <div class="callout warn">
+          <div class="callout-label">Design Note</div>
+          <p>Phase 2 attributes are <em>behavioral tendencies</em>, not performance multipliers. Per the EHM research notes, they influence the frequency and likelihood of actions — a high Hitting rating means the player attempts more hits, not that his hits are more effective. This is why Phase 2 uses event rates rather than outcome metrics.</p>
+        </div>
+
+        <h4>Role Context</h4>
+        <p>Roles matter in Phase 2 more than most phases. An Enforcer has Fighting and Aggression as KEY attributes (floor: 14) with Hitting and Bravery as ESSENTIAL (floor: 13). A Playmaker doesn't have physicality attributes as key, so they follow the standard distribution. This ensures role-appropriate ratings without artificially inflating everyone.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE 3: DEFENSE ═══ -->
+  <div class="phase-section" id="p3">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 3</span>
+      <span class="phase-title">Defensive Skills</span>
+      <span class="phase-attrs">Positioning · Pokecheck · ShotBlocking · Marking</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 3 answers: <strong>"How effectively does this player defend?"</strong> Not effort or willingness (that's Phase 2) — this is skill execution. Can this player close passing lanes? Does he suppress chances? Is he in the right position? The vNext overhaul replaced proxy stats with direct defensive impact measures.</p>
+        </div>
+
+        <h4>Attributes Modeled</h4>
+        <p>
+          <span class="attr-pill modeled">Positioning</span>
+          <span class="attr-pill modeled">Pokecheck</span>
+          <span class="attr-pill modeled">ShotBlocking</span>
+          <span class="attr-pill modeled">Marking</span>
+        </p>
+
+        <h4>Key Data Signals</h4>
+        <div class="signal-list">
+          <div class="signal-item">LB Hockey: Chance Suppression</div>
+          <div class="signal-item">LB Hockey: Retrievals grade</div>
+          <div class="signal-item">LB Hockey: D-Zone Pressure Mitigation</div>
+          <div class="signal-item">Evolving Hockey RAPM xGA/60</div>
+          <div class="signal-item">Evolving Hockey Giveaway/Takeaway rates</div>
+          <div class="signal-item">MoneyPuck on-ice xGoals Against</div>
+          <div class="signal-item">MoneyPuck Corsi differentials</div>
+          <div class="signal-item">NHL.com Blocked Shots/60</div>
+          <div class="signal-item">NHL.com Takeaways/60</div>
+        </div>
+
+        <h4>How It Works</h4>
+        <p><strong>Positioning</strong> — the most important defensive attribute per the research notes — is now anchored by LB Hockey's Chance Suppression (direct measure of preventing quality chances against), Evolving Hockey's RAPM xGA/60 (isolated individual defensive impact), and Evolving Hockey giveaway/takeaway rates. A shutdown defenseman who suppresses chances and mitigates zone pressure is properly recognized even if he doesn't rack up blocked shots.</p>
+
+        <p><strong>Pokecheck</strong> captures stick-on-puck defensive execution, driven by takeaway rates, blocked shots, and chance suppression. <strong>ShotBlocking</strong> is relatively straightforward — it's primarily driven by blocked shot rates from NHL.com data. <strong>Marking</strong> captures positional awareness in coverage, using on-ice chance suppression and relative metrics.</p>
+
+        <p>Phase 3 applies a global <strong>+2 lift</strong> to skater defensive skill attributes. This reflects the research notes guidance that NHL-level players should generally have respectable defensive fundamentals — the floor of NHL defensive ability is higher than the EHM scale's midpoint.</p>
+
+        <div class="callout success">
+          <div class="callout-label">vNext Change</div>
+          <p>NST-derived xGA/60 and CA/60 were fully replaced by MoneyPuck equivalents (on-ice xGoals Against and Corsi differentials). LB Hockey Chance Suppression, Retrievals, and D-Zone Pressure Mitigation were added as first-class signals — these directly measure defensive outcomes that traditional stats only approximate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE 4: SKATING ═══ -->
+  <div class="phase-section" id="p4">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 4</span>
+      <span class="phase-title">Skating &amp; Conditioning</span>
+      <span class="phase-attrs">Acceleration · Pace · Stamina · NaturalFitness · Agility</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 4 answers: <strong>"How does this player move, and how long can he keep it up?"</strong> This is where NHL EDGE tracking data really shines — we're using actual measured skating speeds and distances from the puck tracking cameras, not estimates. When the data says McDavid hit 24.3 mph, that's a real measurement, not a proxy.</p>
+        </div>
+
+        <h4>Attributes Modeled</h4>
+        <p>
+          <span class="attr-pill modeled">Acceleration</span>
+          <span class="attr-pill modeled">Pace</span>
+          <span class="attr-pill modeled">Stamina</span>
+          <span class="attr-pill modeled">NaturalFitness</span>
+          <span class="attr-pill modeled">Agility</span>
+        </p>
+
+        <h4>Key Data Signals</h4>
+        <div class="signal-list">
+          <div class="signal-item">EDGE: Top skating speed &amp; percentile</div>
+          <div class="signal-item">EDGE: Speed bursts ≥22 mph count</div>
+          <div class="signal-item">EDGE: Average skating speed</div>
+          <div class="signal-item">EDGE: Total skating distance per game</div>
+          <div class="signal-item">EDGE: Distance per shift</div>
+          <div class="signal-item">TOI-based workload metrics</div>
+          <div class="signal-item">BMI z-scores (Agility component)</div>
+        </div>
+
+        <h4>How It Works</h4>
+        <p><strong>Acceleration</strong> and <strong>Pace</strong> are directly driven by EDGE tracking data. Top speed feeds Pace (how fast can this player go?), while speed bursts (the number of times a player hits ≥22 mph) feed Acceleration (how explosive is their first few strides?). These are the most data-pure attributes in the entire pipeline — direct physical measurements rather than statistical inferences.</p>
+
+        <p><strong>Stamina</strong> and <strong>NaturalFitness</strong> combine EDGE skating distance data (total distance per game, distance per shift) with traditional workload metrics (TOI, shifts per game). A player who covers more ground per shift and maintains consistent shift lengths deep into games rates higher on conditioning.</p>
+
+        <p><strong>Agility</strong> uses BMI-based z-scores as its primary input, with goalie-specific handling. Per the EHM research notes, skating attributes don't significantly affect goalie performance, so goalies receive conservative skating ratings.</p>
+
+        <div class="callout">
+          <div class="callout-label">EDGE Data Coverage</div>
+          <p>EDGE tracking data is available for most NHL players but not all — some players (especially those called up mid-season or with very few games) may be missing. When EDGE data is unavailable, Phase 4 falls back to TOI-based proxy metrics with a reliability penalty. The <code>edge_bulk_collect.py</code> script and patch merge utility exist specifically to maximize EDGE coverage.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE 5: COGNITIVE & OFFENSE ═══ -->
+  <div class="phase-section" id="p5">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 5</span>
+      <span class="phase-title">Cognitive &amp; Offensive Skills</span>
+      <span class="phase-attrs">Anticipation · Decisions · Creativity · Passing · Movement · Stickhandling · Wristshot · Slapshot · Flair · Vision</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 5 answers: <strong>"How does this player create offense and make plays?"</strong> This is the biggest and most analytically complex phase — it shapes playmaking instincts, attacking awareness, shooting technique, and vision. This phase received the most dramatic vNext improvements: z-score mapping, Bayesian shrinkage, and the elite tail boost all landed here.</p>
+        </div>
+
+        <h4>Attributes Modeled</h4>
+        <p>
+          <span class="attr-pill modeled">Anticipation</span>
+          <span class="attr-pill modeled">Decisions</span>
+          <span class="attr-pill modeled">Creativity</span>
+          <span class="attr-pill modeled">Passing</span>
+          <span class="attr-pill modeled">Movement</span>
+          <span class="attr-pill modeled">Stickhandling</span>
+          <span class="attr-pill modeled">Wristshot</span>
+          <span class="attr-pill modeled">Slapshot</span>
+          <span class="attr-pill modeled">Flair</span>
+          <span class="attr-pill modeled">Vision</span>
+        </p>
+
+        <h4>Key Data Signals</h4>
+        <div class="signal-list">
+          <div class="signal-item">Evolving Hockey: Primary Assists/60</div>
+          <div class="signal-item">Evolving Hockey: Individual xG/60</div>
+          <div class="signal-item">Evolving Hockey: relative xGF/60 and xGA/60</div>
+          <div class="signal-item">RAPM: xGF/60 (offensive impact)</div>
+          <div class="signal-item">RAPM: xGA/60 (defensive context)</div>
+          <div class="signal-item">LB Hockey: Transition &amp; Entry Volume</div>
+          <div class="signal-item">LB Hockey: Puck Management &amp; OZ Pressure</div>
+          <div class="signal-item">LB Hockey: Zone Offense/Defense ratings</div>
+          <div class="signal-item">MoneyPuck: Shot type conversion rates</div>
+          <div class="signal-item">EDGE: Shot speed (release velocity)</div>
+          <div class="signal-item">EDGE: Shot location (dangerous area %)</div>
+          <div class="signal-item">HockeyStatCards: Offensive/Defensive ratings</div>
+        </div>
+
+        <h4>How It Works</h4>
+        <p><strong>Cognitive attributes</strong> (Anticipation, Decisions, Creativity) are the hardest to model from stats alone — you can't directly measure "hockey sense." The pipeline uses proxy signals: expected goals differentials (if a player consistently creates more xGF than average, they're making good decisions), transition play grades (players who successfully carry the puck through the neutral zone demonstrate anticipation), and relative on-ice metrics (players who make their teammates better show creative playmaking).</p>
+
+        <p><strong>Passing</strong> is anchored to distribution impact: Primary Assists/60, assist ratios, and LB Hockey's Puck Management and OZ Pressure grades. It's deliberately separated from shot volume — a great passer creates quality looks for teammates, which shows up in assist rates and team expected goals rather than personal shot counts.</p>
+
+        <p><strong>Shooting attributes</strong> (Wristshot, Slapshot) use <strong>Bayesian-shrunk</strong> shot-type conversion rates from MoneyPuck, supplemented by EDGE shot speed data. This is where the Bayesian shrinkage improvement matters most — the old pipeline would give a player who scored on 1 of 2 wrist shots a massive Wristshot rating. Now, low-sample players are shrunk toward the league average, and only players with substantial evidence of elite finishing earn 18+ ratings.</p>
+
+        <p><strong>Flair</strong> is offensive-only and specifically tied to franchise-level talent (PA ≥ 180). It is not modeled for goalies.</p>
+
+        <div class="callout success">
+          <div class="callout-label">vNext Changes</div>
+          <p><strong>Z-score mapping</strong> replaced percentile-rank mapping, creating realistic bell curves instead of flat distributions. <strong>Bayesian shrinkage</strong> was added for shot-type percentages to prevent small-sample inflation. <strong>Elite tail boosts</strong> (PA-gated) ensure franchise talents separate from very good players. <strong>Sprint 4a</strong> wired in 20+ new signals from Evolving Hockey individual rates, RAPM, and LB Hockey context grades.</p>
+        </div>
+
+        <h4>Guardrails</h4>
+        <p>Phase 5 has the most extensive guardrail system in the pipeline:</p>
+        <p>• <strong>Key/Essential floors</strong> — attributes flagged as KEY for a player's role have a floor of 14; ESSENTIAL attributes floor at 13.<br>
+        • <strong>PA floors</strong> — even non-Key/Essential attributes have minimum ratings scaled to PA (a high-PA player won't have a 3 in anything).<br>
+        • <strong>Defensive-archetype soft cap</strong> — shutdown specialists are capped at 16 for pure offensive attributes like Passing and Creativity, preventing noise from creating false elite passers.<br>
+        • <strong>Elite tail boost</strong> — PA-gated, role-gated, only for players already above average.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE 5b: CAREER MENTALS ═══ -->
+  <div class="phase-section" id="p5b">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 5b</span>
+      <span class="phase-title">Career-Informed Mental Attributes</span>
+      <span class="phase-attrs">Consistency · ImportantMatches · Pressure · Determination · Adaptability · Professionalism</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 5b answers: <strong>"What does this player's career history tell us about their character?"</strong> Single-season analytics can't tell you if a player elevates in the playoffs or crumbles under pressure. But a decade of career data — comparing playoff production to regular season, measuring season-to-season consistency, tracking career trajectory through league levels — can. This is an entirely new phase for vNext.</p>
+        </div>
+
+        <div class="callout success">
+          <div class="callout-label">New for vNext</div>
+          <p>Phase 5b did not exist in previous releases. Mental attributes like Consistency, Important Matches, Pressure, and Determination were previously left at database defaults or set manually. These attributes are <strong>performance multipliers</strong> in the EHM engine — Consistency directly controls what percentage of games a player performs at their CA level. Getting them right has enormous gameplay impact.</p>
+        </div>
+
+        <h4>Attributes Modeled</h4>
+        <p>
+          <span class="attr-pill modeled">Consistency</span>
+          <span class="attr-pill modeled">ImportantMatches</span>
+          <span class="attr-pill modeled">Pressure</span>
+          <span class="attr-pill modeled">Determination</span>
+          <span class="attr-pill modeled">Adaptability</span>
+          <span class="attr-pill modeled">Professionalism</span>
+        </p>
+
+        <h4>How It Works</h4>
+        <p><strong>Consistency</strong> is modeled from detrended season-to-season PPG variance (skaters) or SV% variance (goalies). The "detrended" part is important — we remove the expected production arc (players improve through their early 20s and decline in their mid-30s) so we're measuring true inconsistency, not normal career development. Seasons are compared only within the same league tier to avoid cross-tier noise.</p>
+
+        <div class="callout warn">
+          <div class="callout-label">Critical EHM Mechanic</div>
+          <p>Consistency directly controls game-to-game performance: Rating 5 = performs to CA in only 25% of games. Rating 10 = 50%. Rating 15 = 75%. Rating 20 = 100%. A 160 CA player with Consistency 5 will produce like a fringe NHLer most nights. The pipeline defaults NHL regulars to 12–14, reserving sub-10 for documented extreme cases.</p>
+        </div>
+
+        <p><strong>Important Matches</strong> measures the playoff delta — how much a player's production changes in the postseason versus the regular season. A player who goes from 0.8 PPG in the regular season to 1.1 PPG in the playoffs gets a positive delta. Importantly, the EHM scale treats 10 as "performs the same in big games" — above 10 means they <em>elevate</em>, not just maintain. Deltas are tier-weighted (NHL playoffs worth more than AHL playoffs) and require minimum 5 playoff GP.</p>
+
+        <p><strong>Pressure</strong> mirrors Important Matches for skaters (with additional Cup bonus and award signals). Goalies already have Pressure modeled in Phase 7, so Phase 5b skips them.</p>
+
+        <p><strong>Determination</strong> combines Important Matches (45%), Elite Longevity signals (35%), and career path grinding (20%). Stanley Cup winners receive scaled bonuses: 1 Cup = +2, 2 Cups = +3, 3+ Cups = +4. Career award winners (Hart, Norris, Vezina, etc.) get cumulative bonuses with diminishing returns per award type.</p>
+
+        <p><strong>Adaptability</strong> is modeled from geographic diversity (number of distinct regions played in) and nationality signals. A European player who has played in multiple leagues across continents rates higher than someone who has only played in one system.</p>
+
+        <p><strong>Professionalism</strong> uses career PIM rate and longevity as primary signals, correlated with the Sportsmanship attribute. Players with long careers and clean disciplinary records rate higher.</p>
+
+        <h4>Phase 5b Also Adjusts Existing Attributes</h4>
+        <p>Beyond creating new <code>_model</code> columns, Phase 5b applies bounded nudges (±3 max) to Phase 5 attributes based on career signals:</p>
+        <p>• <strong>Anticipation &amp; Decisions</strong> nudged by Consistency signal (consistently good players demonstrate sustained hockey sense)<br>
+        • <strong>WorkRate</strong> nudged by Consistency + IM signal (reliable grinders who show up every game)<br>
+        • <strong>Bravery</strong> nudged by Important Matches signal (players who elevate in playoffs demonstrate courage)<br>
+        • <strong>Teamwork</strong> nudged by Consistency signal (±2 max)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE 6: FACEOFFS ═══ -->
+  <div class="phase-section" id="p6">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 6</span>
+      <span class="phase-title">Faceoffs</span>
+      <span class="phase-attrs">Faceoffs</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 6 is intentionally simple: <strong>faceoff ability is a standalone mechanical skill.</strong> A great faceoff man might be a terrible skater or a defensive liability — the dot is its own world. The phase uses Faceoff ELO ratings (which account for opponent quality) with position-specific ranges and a logistic curve for realistic separation.</p>
+        </div>
+
+        <h4>How It Works</h4>
+        <p>The primary signal is <strong>Faceoff ELO</strong> from hockeyeloratings.com — a more sophisticated measure than raw FO% because it accounts for who you're taking faceoffs against. A player who wins 52% against elite faceoff opponents is more impressive than one who wins 55% against weak competition.</p>
+
+        <p>Position-specific ranges ensure appropriate ratings:</p>
+        <p>• <strong>Centers:</strong> 9–20 range, logistic curve mapping from ELO<br>
+        • <strong>Wingers:</strong> 4–15 range, softened shrinkage toward 7.2 baseline<br>
+        • <strong>Defensemen:</strong> 1–6 tight range (they rarely take faceoffs)</p>
+
+        <p>WorkRate and Stamina z-scores from earlier phases provide small modifiers — the idea being that faceoff consistency requires sustained effort and conditioning.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE 7: GOALIES ═══ -->
+  <div class="phase-section" id="p7">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 7</span>
+      <span class="phase-title">Goaltending</span>
+      <span class="phase-attrs">Reflexes · Positioning · Glove · Blocker · Recovery · Rebounds · OneOnOnes · Agility · Pressure · Stamina · WorkRate</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 7 answers: <strong>"How good is this goalie, and what are they good at?"</strong> Goalie ratings are now the most analytically grounded they've ever been, drawing from five independent goalie-specific data ecosystems. The challenge with goalies is that small samples can swing wildly — a goalie who faces 10 high-danger chances and stops 9 looks elite, but 10 chances is noise. The entire phase is built around Bayesian smoothing and reliability weighting to prevent this.</p>
+        </div>
+
+        <h4>Attributes Modeled</h4>
+        <p>
+          <span class="attr-pill modeled">Reflexes</span>
+          <span class="attr-pill modeled">Positioning</span>
+          <span class="attr-pill modeled">Glove</span>
+          <span class="attr-pill modeled">Blocker</span>
+          <span class="attr-pill modeled">Recovery</span>
+          <span class="attr-pill modeled">Rebounds</span>
+          <span class="attr-pill modeled">OneOnOnes</span>
+          <span class="attr-pill modeled">Agility</span>
+          <span class="attr-pill modeled">Pressure</span>
+          <span class="attr-pill modeled">Stamina</span>
+          <span class="attr-pill modeled">WorkRate</span>
+        </p>
+
+        <h4>Five Data Ecosystems</h4>
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon blue">🏒</div>
+              <div class="card-title">NHL.com Advanced</div>
+            </div>
+            <p>Sv%, GAA, SA/60, quality starts, rest splits, saves by strength, shootout stats, started vs. relieved data.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon cyan">📈</div>
+              <div class="card-title">MoneyPuck Goalies</div>
+            </div>
+            <p>GSAx (Goals Saved Above Expected), high-danger Sv%, expected saves model — the single best measure of goalie quality in modern analytics.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon emerald">🎯</div>
+              <div class="card-title">Evolving Hockey GAR</div>
+            </div>
+            <p>Goalie-specific Goals Above Replacement — how many goals this goalie prevented compared to a replacement-level netminder.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon purple">📡</div>
+              <div class="card-title">EDGE Goalie Tracking</div>
+            </div>
+            <p>Save % by shot location (left, right, high danger zones), lateral movement metrics, positioning data from tracking cameras.</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon amber">⭐</div>
+              <div class="card-title">LB Hockey Goalie WAR</div>
+            </div>
+            <p>Wins Above Replacement with component breakdowns — another independent evaluation of goalie quality.</p>
+          </div>
+        </div>
+
+        <h4>Goalie-Specific Math</h4>
+        <p>Phase 7 uses specialized mathematical tools beyond the standard pipeline foundations:</p>
+
+        <p><strong>Four-leg reliability</strong> — goalie reliability is computed from GP, starts, TOI, and a shots-against proxy (SA/60 × TOI). All four legs are blended to determine how much to trust the data. A goalie with 50 starts and 1,500+ shots against gets full trust; a goalie with 8 starts in relief gets heavy shrinkage.</p>
+
+        <p><strong>Bayesian save% smoothing</strong> — for segment-specific save percentages (high-danger, glove side, blocker side), raw percentages are blended with the goalie's own overall Sv% as a prior. With 200–300 prior shots of weight, small-sample segments don't swing wildly.</p>
+
+        <p><strong>"Shrink to average+"</strong> — when evidence is weak, attributes shrink toward 0.55 (not 0.50). This reflects that NHL goalies as a pool should not cluster as "below average" — they're already the best in the world. The target is "average NHL goalie," which is a very good goalie.</p>
+
+        <p><strong>Tail-only boost</strong> — after shrinkage, a gentle "tail-only boost" allows elite goalies to reach 19–20 ratings on core skills without inflating the entire population. Values below a pivot point barely move; values above get a lift proportional to how far above they already are.</p>
+
+        <h4>Specific Attribute Logic</h4>
+        <p><strong>Positioning</strong> (the most important goalie attribute per research notes) is driven by EDGE shot-location save percentages, GSAx, and overall positioning metrics. <strong>Reflexes</strong> feeds from high-danger save percentage and GSAx. <strong>Glove</strong> and <strong>Blocker</strong> use EDGE left/right save percentage data with Bayesian smoothing. <strong>Stamina</strong> uses rest splits (how goalies perform on back-to-backs). <strong>OneOnOnes</strong> is fed by shootout save percentage. <strong>WorkRate</strong> for goalies uses workload metrics (starts, SA/60, games played pace) rather than the skater engagement formula.</p>
+
+        <div class="callout success">
+          <div class="callout-label">vNext Change</div>
+          <p>The "uniform ladder" distribution bug was fixed — the old rank-based mapping produced roughly equal numbers of goalies at every rating level. Normal-CDF shaping now creates realistic distributions. Goalie Agility floor raised to ~12 with an 18–20 tail for the most athletic netminders. Flair confirmed as irrelevant for goalies.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE 7b: GOALIE MENTALS ═══ -->
+  <div class="phase-section" id="p7b">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 7b</span>
+      <span class="phase-title">Goalie Career Mentals</span>
+      <span class="phase-attrs">Consistency · ImportantMatches · Pressure · Determination · Leadership · Loyalty · Ambition · Professionalism · Adaptability</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 7b is the goalie equivalent of Phase 5b — it uses multi-year career history to model mental and character attributes for goalies specifically. It runs <em>after</em> Phase 7 (goalie analytics) so career-informed mentals layer on top of analytics-driven attributes, exactly how skaters get analytics first (P2–P5) then career mentals (P5b).</p>
+        </div>
+
+        <div class="callout success">
+          <div class="callout-label">New for vNext</div>
+          <p>Phase 7b did not exist in previous releases. Goalie mental attributes were set to defaults or inherited from the generic goalie model. The new phase mirrors the skater Phase 5b architecture but with goalie-specific signal handling — SV% coefficient of variation for Consistency, playoff SV% delta for Important Matches, and a Pressure blend that combines Phase 7 analytics (60%) with career signals (40%).</p>
+        </div>
+
+        <h4>Attributes Modeled (Goalies Only)</h4>
+        <p>
+          <span class="attr-pill modeled">Consistency</span>
+          <span class="attr-pill modeled">ImportantMatches</span>
+          <span class="attr-pill modeled">Pressure</span>
+          <span class="attr-pill modeled">Determination</span>
+          <span class="attr-pill modeled">Leadership</span>
+          <span class="attr-pill modeled">Loyalty</span>
+          <span class="attr-pill modeled">Ambition</span>
+          <span class="attr-pill modeled">Professionalism</span>
+          <span class="attr-pill modeled">Adaptability</span>
+        </p>
+
+        <h4>How It Differs from Skater Mentals (5b)</h4>
+        <p><strong>Consistency</strong> uses SV% coefficient of variation rather than PPG CV. Goalie SV% is the appropriate metric, but it requires careful league filtering — many leagues don't report saves/GA reliably, so only data from confirmed-reliable leagues is used.</p>
+
+        <p><strong>Important Matches</strong> uses playoff SV% delta (playoff SV% minus regular season SV%). A positive delta means the goalie raised their game in the postseason. Cup winners receive scaled bonuses, and Conn Smythe winners get additional recognition.</p>
+
+        <p><strong>Pressure</strong> is unique among goalie mentals — it blends Phase 7's analytics-derived Pressure (60%) with career signals (40%). This reflects that goalie pressure is partly captured by current-season shot volume and situation data, and partly by career playoff history. A PA floor ensures high-potential goalies don't get underrated.</p>
+
+        <p><strong>Leadership</strong> is conservatively modeled for goalies — captaincy is extremely rare for netminders, so the rating is capped at 14 unless the goalie has actual C/A history in their career data.</p>
+
+        <p><strong>Loyalty</strong> and <strong>Ambition</strong> are modeled in Phase 7b (unlike Phase 5b where they remained unmodeled for skaters), using tenure ratios, team changes, international breadth, and draft pedigree signals from the EP career data.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE 8: CA & ROLES ═══ -->
+  <div class="phase-section" id="p8">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-number">Phase 8</span>
+      <span class="phase-title">CA Suggestion &amp; Role Engine</span>
+      <span class="phase-attrs">CA · Tier · Role Suggestion · EP Tags</span>
+      <span class="phase-chevron">▼</span>
+    </div>
+    <div class="phase-body">
+      <div class="phase-content">
+        <div class="eli5">
+          <div class="eli5-label">The Simple Version</div>
+          <p>Phase 8 is the "quality inspector" at the end of the assembly line. After all individual attributes have been modeled, it steps back and asks: <strong>"Does this player's overall rating make sense?"</strong> It compares the full attribute profile to what the player's current CA implies, suggests adjustments, and also evaluates whether the player's assigned role matches their analytics profile. This is entirely new for vNext.</p>
+        </div>
+
+        <div class="callout success">
+          <div class="callout-label">New for vNext</div>
+          <p>Phase 8 did not exist in previous releases. CA and roles were manually set. The new engine uses composite z-scores, position-pool percentiles, a 28-tier CA system, and an archetype scoring engine with 30+ skater role types and 3 goalie styles.</p>
+        </div>
+
+        <h4>CA Suggestion Pipeline</h4>
+        <div class="formula-block">
+          <div class="formula-label">Processing Order</div>
+          <div class="formula">Composite Z-scores → Percentile (per position pool) → Tier Assignment →
+Spread Within Tier → GP Confidence Blend → Box Score Production Floor (F only) →
+Career Floor (all positions) → Star Power Floor (named list) →
+Tier Label Re-derivation → CA Delta → Write to Master</div>
+        </div>
+
+        <p>The system uses a <strong>rate-first approach</strong> — per-60 and per-game metrics rather than counting stats, so injured players (like a Brayden Point or Connor Bedard with limited games) aren't penalized for missing time. Their per-minute impact drives the CA suggestion.</p>
+
+        <h4>Deployment Floors</h4>
+        <p>Players trusted by NHL coaching staffs receive minimum CA ratings regardless of analytics:</p>
+        <p>• Goalies with 30+ starts → minimum CA 130<br>
+        • Goalies with 20+ starts → minimum CA 128<br>
+        • Skaters with regular NHL deployment get position-specific floors</p>
+        <p>This reflects the reality that a fourth-liner playing 12 minutes a night in the NHL is there for a reason — physicality, penalty killing, locker room presence — that analytics may not fully capture.</p>
+
+        <h4>Star Power System</h4>
+        <p>A named list of franchise-caliber players receives explicit CA floors to prevent analytics from underrating historically elite talent during a down stretch. A player like Connor McDavid with a 200 CA shouldn't drop to 170 because of a 30-game sample during an odd season.</p>
+
+        <h4>Skater Role Suggestion Engine</h4>
+        <p>The engine scores every skater against <strong>30+ archetype fingerprints</strong> — each defined by a set of weighted attribute expectations. For example, a "Sniper" archetype expects high Wristshot, Slapshot, and OffensiveRole with moderate Creativity; a "Grinder" expects high WorkRate, Hitting, and Checking with defensive orientation.</p>
+
+        <p><strong>Elite Prospects tags</strong> provide an independent scouting layer. When EP scouts call someone a "Power Forward" and the analytics agree it's a reasonable fit, the system trusts that human observation. Tags add 5–15 point bonuses to matching archetype scores, with confidence scaling by tag count (1 tag = 60%, 2 tags = 85%, 3+ tags = 100%). Conflicting tags are resolved using goal share as a tiebreaker.</p>
+
+        <h4>Goalie Role Suggestion</h4>
+        <p>Goalies have 3 possible EHM roles: Butterfly, Mixed, and Hybrid. The system scores each style using analytics signatures (positioning metrics, lateral movement, EDGE data) and EP goalie style tags (Athletic Goalie, Butterfly Goalie, Positional Goalie, etc.). EP tags receive a +15 bonus to the matching style score, reflecting that playing style is best observed by scouts rather than inferred from stats.</p>
+
+        <p>EP goalie tags also drive small attribute nudges: Athletic Goalie → Agility +1, Reflexes +1, Recovery +1. Positional Goalie → Positioning +1, Anticipation +1, Decisions +1. These are bounded scouting-intelligence nudges — small directional adjustments that analytics can't fully capture.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5: CA TIER SYSTEM                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="ca-tiers">
+  <div class="section-label">Section 05</div>
+  <h2>CA Tier System (v2.1)</h2>
+
+  <p>The CA tier system maps analytics-derived composite scores to specific Current Ability values. It's designed to create realistic separation between tiers while respecting the EHM engine's expectations for how a player at each CA level should perform.</p>
+
+  <h3>Skater Tiers — Forwards</h3>
+  <table class="tier-table">
+    <thead>
+      <tr><th>Tier</th><th>CA</th><th>Description</th><th style="width:200px">Range</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong style="color:var(--accent-amber)">Franchise (High)</strong></td>
+        <td>200</td>
+        <td>Generational talent — the absolute best in the world</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:100%;background:var(--accent-amber)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-amber)">Franchise (Med)</strong></td>
+        <td>190</td>
+        <td>Perennial Hart Trophy contender</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:95%;background:var(--accent-amber)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-amber)">Franchise (Low)</strong></td>
+        <td>182</td>
+        <td>Franchise cornerstone, top-5 at position</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:91%;background:var(--accent-amber)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-purple)">Elite (High)</strong></td>
+        <td>174</td>
+        <td>All-Star caliber, top-line driver</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:87%;background:var(--accent-purple)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-purple)">Elite (Low)</strong></td>
+        <td>168</td>
+        <td>Consistent first-line / top-pair impact</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:84%;background:var(--accent-purple)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-blue)">Top 6 (High)</strong></td>
+        <td>164</td>
+        <td>Strong top-6 forward, quality 2nd liner</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:82%;background:var(--accent-blue)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-blue)">Top 6 (Mid)</strong></td>
+        <td>156</td>
+        <td>Solid top-6 contributor</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:78%;background:var(--accent-blue)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-blue)">Top 6 (Low)</strong></td>
+        <td>148</td>
+        <td>Fringe top-6 / strong 3rd liner</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:74%;background:var(--accent-blue)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-cyan)">Bottom 6 (High)</strong></td>
+        <td>144</td>
+        <td>Quality bottom-6, strong role player</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:72%;background:var(--accent-cyan)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-cyan)">Bottom 6 (Mid)</strong></td>
+        <td>140</td>
+        <td>Reliable bottom-6 forward</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:70%;background:var(--accent-cyan)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-cyan)">Bottom 6 (Low)</strong></td>
+        <td>134</td>
+        <td>Fourth-liner, limited but trusted</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:67%;background:var(--accent-cyan)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--text-muted)">Replacement (High)</strong></td>
+        <td>128</td>
+        <td>NHL/AHL tweener, 13th forward</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:64%;background:var(--text-muted)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--text-muted)">Replacement (Mid)</strong></td>
+        <td>124</td>
+        <td>Emergency callup, AHL regular</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:62%;background:var(--text-muted)"></div></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--text-muted)">Replacement (Low)</strong></td>
+        <td>120</td>
+        <td>AHL regular, NHL depth</td>
+        <td><div class="tier-bar"><div class="tier-bar-fill" style="width:60%;background:var(--text-muted)"></div></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-label">Design Note</div>
+    <p>The v2.1 tier system deliberately has no "Top 9 Forward" label. Analysis showed this tier was misleading — in practice, the distinction between a low Top 6 player and a high Bottom 6 player is better captured by the continuous spread within the 134–164 CA range. Defenseman tiers mirror forward tiers with appropriate label changes (Top Pair, Bottom Pair).</p>
+  </div>
+
+  <h3>Career Floor System</h3>
+  <p>The career floor prevents analytics from underrating established players during a single bad season. Maximum drops from established CA are age-relaxed:</p>
+
+  <table class="tier-table">
+    <thead>
+      <tr><th>Established Level</th><th>Base Max Drop</th><th>Age 33+</th><th>Age 35+</th><th>Age 37+</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Franchise (≥182)</strong></td><td>−8</td><td>−10</td><td>−12</td><td>−14</td></tr>
+      <tr><td><strong>Elite (≥170)</strong></td><td>−12</td><td>−15</td><td>−18</td><td>−21</td></tr>
+      <tr><td><strong>Top 6 / Top Pair (≥150)</strong></td><td>−16</td><td>−20</td><td>−24</td><td>−28</td></tr>
+      <tr><td><strong>Established (≥130)</strong></td><td>−20</td><td>−25</td><td>−30</td><td>−35</td></tr>
+    </tbody>
+  </table>
+  <p class="text-sm text-muted">Example: A Franchise player (CA 190) under age 33 can drop to 182 minimum, no matter how bad the analytics say this season was. After 37, that floor loosens to 176, allowing for legitimate late-career decline.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 6: ROLE ENGINE                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="roles">
+  <div class="section-label">Section 06</div>
+  <h2>Role Suggestion Engine</h2>
+
+  <p>Roles matter in EHM — they affect which attributes the engine prioritizes for a player's performance calculations, which deployment slots the AI coach considers, and how the player develops over time. A misassigned role can cost a player substantial effective rating points.</p>
+
+  <h3>How Skater Roles Are Assigned</h3>
+  <p>The engine scores every skater against <strong>30+ archetype fingerprints</strong>. Each archetype defines a "signature" — a set of attribute expectations with weights. The player's modeled attributes are compared against each archetype's signature, producing a fit score. The highest-scoring archetype becomes the suggested role.</p>
+
+  <p>Archetypes span the full spectrum of hockey roles:</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon blue">🎯</div>
+        <div class="card-title">Offensive Archetypes</div>
+      </div>
+      <p>Sniper, Playmaker, Playmaker (Finesse), Offensive, Power Forward, Dangler, and their sub-variants. These emphasize Wristshot, Slapshot, Passing, Vision, Creativity, and OffensiveRole.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon emerald">🛡️</div>
+        <div class="card-title">Defensive Archetypes</div>
+      </div>
+      <p>Defensive, Defensive (Finesse), Two-Way, Two-Way (Physical), Checking, Shutdown. These emphasize Positioning, Checking, Pokecheck, DefensiveRole, and WorkRate.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon red">💪</div>
+        <div class="card-title">Physical Archetypes</div>
+      </div>
+      <p>Grinder, Enforcer, Power Forward (Physical), Energy. These emphasize Hitting, Checking, Aggression, Fighting, Bravery, and Strength.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon amber">⚖️</div>
+        <div class="card-title">Balanced Archetypes</div>
+      </div>
+      <p>All Around, Standard, Utility. These balance offensive and defensive attributes without strong emphasis in either direction.</p>
+    </div>
+  </div>
+
+  <h3>Elite Prospects Tag Integration</h3>
+  <p>EP tags serve as scouting intelligence on top of the analytics. When EP's scouting team labels a player with a specific type tag, the system uses it in two ways:</p>
+  <p>• <strong>Direct role mapping</strong> — tags like "Sniper," "Power Forward," or "Defensive Center" map directly to an EHM archetype. If the analytics confirm it's a reasonable fit (within 12 points of the best score), the EP-suggested role wins.<br>
+  • <strong>Soft score boosts</strong> — tags that imply a style without naming a specific role (e.g., "Heavy Shooter," "Offensive Forward") add 5–15 point bonuses to matching archetype scores.</p>
+  <p>Conflicting tags (e.g., "Sniper" + "Playmaker" on the same player) are resolved using goal share as the primary signal — if a player scores more than 45% of their points as goals, the scorer tag wins.</p>
+
+  <h3>Deployment Compatibility</h3>
+  <p>The engine includes a deployment compatibility layer that prevents role suggestions from breaking EHM's AI coaching logic. For example, tagging a power play specialist as "defensive" would make OffensiveRole irrelevant to the AI coach, meaning the player would never see PP time. The system adjusts scores after archetype scoring to ensure suggested roles are compatible with real deployment patterns.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 7: NHL/AHL MERGE                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="merge">
+  <div class="section-label">Section 07</div>
+  <h2>NHL/AHL Merge Logic</h2>
+
+  <p>When a player appears in both the NHL and AHL modeled outputs (think a callup who played 25 games in each league), the pipeline needs to decide which set of ratings to use. This sounds simple but turned out to be one of the most critical — and most buggy — parts of the pipeline.</p>
+
+  <div class="callout warn">
+    <div class="callout-label">Critical Bug Fixed in vNext</div>
+    <p>The previous merge script had a silent bug where the AHL GP column name had changed during an earlier schema cleanup (from <code>ahl_onice_5v5__games_played</code> to <code>ahl_onice__games_played</code>), causing all AHL GP to resolve as zero. This meant NHL data <em>always</em> won for overlap players, regardless of actual games played. The bug was invisible because the "correct" answer (NHL wins) happened to be right most of the time by coincidence.</p>
+  </div>
+
+  <h3>Quality-Preferred Merge (vNext Default)</h3>
+  <p>Even with the bug fixed, the old "highest GP wins" logic was wrong in principle. A player with 13 NHL games has data from 20+ independent analytical models (MoneyPuck xG, Evolving Hockey GAR/RAPM, EDGE tracking, HockeyStatCards, LB Hockey WAR). A player with 30 AHL games has data from 4–7 AHLTracker categories with no xG models, no isolated impact metrics, and no tracking data. The NHL sample is objectively superior in analytical depth.</p>
+
+  <div class="formula-block">
+    <div class="formula-label">Quality-Preferred Decision Logic</div>
+    <div class="formula"><span class="comment">// Skater overlap:</span>
+IF NHL_GP ≥ 10  → NHL wins
+ELIF NHL_GP > 0 AND NHL_GP ≥ AHL_GP  → NHL wins (tiebreak)
+ELSE  → AHL wins
+
+<span class="comment">// Goalie overlap:</span>
+IF NHL_GP ≥ 5  → NHL wins
+ELIF NHL_GP > 0 AND NHL_GP ≥ AHL_GP  → NHL wins (tiebreak)
+ELSE  → AHL wins</div>
+  </div>
+
+  <p>Validation against the current data: 137 overlap players → 117 NHL wins, 20 AHL wins (18 skaters with 8–9 NHL GP, 2 goalies with 4 NHL GP). Every overlap decision is logged with the reasoning for easy auditing.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 8: AHL PIPELINE                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="ahl">
+  <div class="section-label">Section 08</div>
+  <h2>AHL Pipeline</h2>
+
+  <p>The AHL pipeline follows the same principles as the NHL pipeline but with a critical constraint: <strong>the data is much thinner</strong>. Where NHL players have 20+ independent analytical sources, AHL players have essentially one — AHLTracker.com. There are no expected goals models, no RAPM, no EDGE tracking data, and no WAR frameworks at the AHL level.</p>
+
+  <p>This constraint drives every design decision in the AHL pipeline. The system must produce plausible AHL-level ratings without letting limited data create false precision or accidentally NHL-grade attributes.</p>
+
+  <h3>Six-Layer Guardrail System</h3>
+  <p>The AHL skater model uses an aggressive multi-layered approach to prevent unrealistic attribute inflation:</p>
+
+  <p>1. <strong>Reliability shrink</strong> — uses GP (AHL master has no TOI) with sqrt scaling so low-sample players don't swing wildly<br>
+  2. <strong>Role contracts</strong> — define per-role Key/Essential/Irrelevant importance, applied in score space<br>
+  3. <strong>PA banding</strong> — enforces AHL-specific ceilings and floors to create separation even when league data is limited<br>
+  4. <strong>AHL technical ceiling enforcement</strong> — squish + evidence-gated caps + hard caps prevent AHL technicals from rolling NHL-grade<br>
+  5. <strong>League-specific caps</strong> — ensure AHL ratings stay below NHL equivalents for comparable percentile performance<br>
+  6. <strong>GP-proportional weighting</strong> — prevents players with minimal AHL time from getting full-confidence ratings</p>
+
+  <h3>AHL Goalie Model</h3>
+  <p>AHL goalies are even more data-limited than skaters — the primary inputs are basic Sv%, GAA, GP, and limited strength-state splits from AHLTracker. The model uses the same Bayesian smoothing and shrink-to-average+ approach as Phase 7, but with wider confidence intervals and more conservative rating bounds.</p>
+
+  <h3>AHL Phase 3: CA &amp; Role Suggestion</h3>
+  <div class="callout success">
+    <div class="callout-label">New for vNext</div>
+    <p>The AHL pipeline now has its own dedicated CA suggestion and role engine, mirroring NHL Phase 8 but adapted for AHL data availability. This ensures AHL players get analytically-informed CA suggestions and role assignments rather than relying entirely on manual settings.</p>
+  </div>
+  <p>AHL Phase 3 produces CA suggestions for both skaters and goalies, role suggestions for skaters (12 archetypes — a streamlined subset of the NHL's 30+), and goalie style suggestions (Butterfly/Mixed/Hybrid) with EP tag integration. The same Elite Prospects scouting tags used in the NHL pipeline flow through to AHL players who have coverage.</p>
+  <p>The key difference from NHL Phase 8 is that AHL composite scores are built from fewer signal pillars — the absence of xG models, RAPM, and tracking data means the system relies more heavily on traditional rate stats and PA banding for tier placement. AHL-specific tier tables ensure ratings stay calibrated for the minor-league context.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 9: UTILITY & QA SCRIPTS                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="utilities">
+  <div class="section-label">Section 09</div>
+  <h2>Utility &amp; QA Scripts</h2>
+
+  <p>Beyond the core modeling phases, the pipeline includes several utility and quality assurance scripts that support data collection, pre-processing, validation, and visualization.</p>
+
+  <h3>Data Collection &amp; Pre-Processing</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon cyan">📡</div>
+        <div class="card-title">edge_bulk_collect.py</div>
+      </div>
+      <p>Bulk-collects NHL EDGE tracking data from public endpoints across all teams. Supports team mode (full roster), player mode (individual patches for missing data), and all-teams mode (baseline collection). Produces merge-ready CSV files for all six EDGE metric categories with rate-limited API calls and deduplication.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon cyan">🔗</div>
+        <div class="card-title">merge_edge_patch_into_all_teams.py</div>
+      </div>
+      <p>Cleanly inserts missing player EDGE data into the ALL_TEAMS baseline files. Uses full-replacement merge logic — patched player IDs completely replace any existing rows, preventing duplicate or stale data. Essential for players added mid-season or with initially missing tracking data.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon emerald">📋</div>
+        <div class="card-title">career_signals_prep.py</div>
+      </div>
+      <p>Derives career signals from Elite Prospects raw player stats (EP2EHM format). Produces ~55 columns including captaincy history, tournament-level international detail, detrended PPG variance, playoff deltas, loyalty/ambition signals, and award bonuses. Consumed by Phase 5b and Phase 7b for career-informed mental modeling.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon purple">🏷️</div>
+        <div class="card-title">ep_style_integration.py</div>
+      </div>
+      <p>Processes Elite Prospects player style tags and maps them to EHM archetype affinities. Handles tag conflict resolution (e.g., "Sniper" + "Playmaker" resolved via goal share), confidence scaling by tag count, and direct role overrides. Produces the EP tag data consumed by Phase 8 and AHL Phase 3.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon blue">🌐</div>
+        <div class="card-title">capwages_depth_chart_collect.py</div>
+      </div>
+      <p>Collects current depth chart data from CapWages.com for all 32 NHL teams. Provides independent deployment context (line assignments, PP/PK units) used for validating role assignments and deployment floor decisions.</p>
+    </div>
+  </div>
+
+  <h3>Pipeline Orchestration</h3>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon amber">⚙️</div>
+      <div class="card-title">run_pipeline.py</div>
+    </div>
+    <p>Orchestrates the full pipeline execution. Runs the correct sequence of scripts with proper input/output chaining and stdin piping for interactive prompts. Supports running NHL only, AHL only, or both tracks plus final merge. Includes <code>--dry-run</code> mode for testing and <code>--start-from</code> for resuming after failures.</p>
+    <div class="formula-block">
+      <div class="formula-label">Execution Order</div>
+      <div class="formula"><span class="comment">NHL Track:</span>
+  Build → P2 → P3 → P4 → P5 → P5b → P6 → P7 → P7b → P8
+
+<span class="comment">AHL Track:</span>
+  Build → Skaters → Goalies → Phase 3 (CA/Role)
+
+<span class="comment">Final:</span>
+  NHL Master + AHL Master → Quality-Preferred Merge → Combined Output</div>
+    </div>
+  </div>
+
+  <h3>Quality Assurance &amp; Visualization</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon red">🔍</div>
+        <div class="card-title">qa_attribute_diff_viewer.py</div>
+      </div>
+      <p>Generates an interactive HTML viewer showing every player's database attribute values side-by-side with modeled values. Color-coded delta cells, filterable by Role, Club, and NHL/AHL source, with search-by-name. Now also integrated directly into the final merge script for automatic generation. Mental attributes (Phase 5b/7b) are displayed in a separate group.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon red">📊</div>
+        <div class="card-title">qa_role_attribute_crosstab.py</div>
+      </div>
+      <p>Diagnostic QA that cross-tabulates role archetypes against rating buckets (Low/Mid/High/Elite) for every modeled attribute. Identifies role types landing in unexpected ranges — Grinders with Elite Wristshot, Snipers with Low Passing — that indicate potential role mismatches or formula issues. Outputs console summaries plus full CSV crosstabs and outlier reports.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon amber">📋</div>
+        <div class="card-title">generate_depth_charts.py</div>
+      </div>
+      <p>Reads the final merged master and generates a self-contained interactive HTML depth chart for all 32 NHL teams. Players sorted by CA within positional columns (LW/C/RW, LD/RD, G) with click-to-expand attribute panels, color-coded 1–20 values, Evolving Hockey GAR summaries, and team color theming. Optionally includes AHL farm system players when provided with AHL master data.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 10: DRAFT CLASSES                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="draft-classes">
+  <div class="section-label">Section 10</div>
+  <h2>Draft Class System</h2>
+
+  <p>Every NHL draft class in the database — from the upcoming 2026 class through early scouting on 2030 — is built using a structured, multi-source scouting pipeline that assigns Potential Ability (PA) tiers based on real-world prospect rankings, position-aware fill rules, and a League Signal Bonus system that incorporates CHL draft history, junior league rights, and USNTDP status.</p>
+
+  <div class="eli5">
+    <div class="eli5-label">The Simple Version</div>
+    <p>Every draft class needs the right mix of franchise talents, first-rounders, mid-rounders, and filler prospects — with realistic position balance. We cross-reference multiple scouting sources (NHL Central Scouting, Elite Prospects, Scott Wheeler, HFBoards community), validate each prospect's eligibility against the September 15 birth cutoff, then assign PA tiers using a composite ranking that rewards players appearing on multiple lists. Players drafted by CHL teams or selected for the USNTDP get an additional credibility boost.</p>
+  </div>
+
+  <h3>Scouting Source Hierarchy</h3>
+  <p>Sources are ranked in strict descending priority. When filling tier slots, players backed by higher-priority sources are always selected first. Players appearing on multiple independent lists receive a composite score boost — if both Central Scouting and Elite Prospects rank you, that's significantly more credible than a single-source mention.</p>
+
+  <table class="source-table">
+    <thead>
+      <tr><th>Priority</th><th>Source</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>1</strong></td><td><span class="source-name">CSS</span> — Central Scouting</td><td>NHL Central Scouting midterm/final rankings. Separate lists for North American skaters, North American goalies, International skaters, and International goalies. The gold standard.</td></tr>
+      <tr><td><strong>2</strong></td><td><span class="source-name">EP</span> — Elite Prospects</td><td>EP Consolidated rankings including consensus lists, top prospect lists, and other notable mentions. Broad international coverage.</td></tr>
+      <tr><td><strong>3</strong></td><td><span class="source-name">HFB</span> — HFBoards</td><td>Community scouting mentions, ranked lists, and discussion threads. User-curated lists carry extra weight.</td></tr>
+      <tr><td><strong>4</strong></td><td><span class="source-name">Lines</span> — DobberProspects/Lines</td><td>Draft-eligible prospect rankings from independent scouting content.</td></tr>
+      <tr><td><strong>5</strong></td><td><span class="source-name">HP</span> — Hockey Prospects</td><td>Additional prospect ranking coverage.</td></tr>
+      <tr><td><strong>6</strong></td><td><span class="source-name">NZ</span> — NHL Numbers/Zone</td><td>Analytics-leaning prospect evaluation.</td></tr>
+      <tr><td><strong>7</strong></td><td><span class="source-name">TSN</span> — The Scouting News</td><td>Largest single-source database with letter grades (A+ through D). Provides the bulk of the mid-to-late round population.</td></tr>
+      <tr><td><strong>8</strong></td><td><span class="source-name">HTML-DB</span> — Database Default</td><td>Players already in the EHM database. Restricted: never placed at -8 or above; displaced by TSN for ≤2027 classes.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>PA Tier Structure</h3>
+  <p>Each draft class follows hard position-distribution requirements across six tiers. The PA values use EHM's negative-PA system, where the game engine resolves each negative value into a randomized range at game start — this creates natural variance where some -19 prospects become stars and others become solid NHLers.</p>
+
+  <table class="tier-table">
+    <thead>
+      <tr><th>PA</th><th>Label</th><th>Range Resolved</th><th>Per Class</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong style="color:var(--accent-amber)">-10</strong></td>
+        <td>Franchise</td><td>170–200</td><td>2</td>
+        <td>Generational/franchise talent. Tight range ensures these prospects reliably become elite NHLers.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-red)">-20</strong></td>
+        <td>Wide Elite</td><td>150–200</td><td>5</td>
+        <td>Could be generational or merely elite — the wider range models true top-5 draft uncertainty.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-purple)">-19</strong></td>
+        <td>High 1st Round</td><td>130–180</td><td>35</td>
+        <td>High first-round picks with star upside. Ceiling allows franchise outcomes, floor keeps them as NHL regulars.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--accent-blue)">-8</strong></td>
+        <td>1st Round</td><td>130–160</td><td>26</td>
+        <td>Solid first-rounders. Lower ceiling than -19 reflects "safe pick" profile — good NHL player, not a star.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--text-secondary)">-17</strong></td>
+        <td>Mid Rounds</td><td>90–140</td><td>342</td>
+        <td>The bulk of the class. Range allows both bust (90 = minor leaguer) and surprise breakout (140 = quality NHLer).</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--text-muted)">-12</strong></td>
+        <td>Filler</td><td>40–100</td><td>All remaining</td>
+        <td>Undrafted/unranked prospects. Max out at AHL level, providing realistic draft depth.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="text-sm text-muted"><strong>Non-filler total: 410 players per class.</strong> Position targets are hard requirements — the fill algorithm enforces exact counts per position at each tier (e.g., -19 must have exactly 4G, 6LD, 6RD, 6LW, 7C, 6RW). PA is always resolved as the maximum of the range, per project standards.</p>
+
+  <h3>Tier Assignment Process</h3>
+  <p>The fill algorithm works top-down with position awareness:</p>
+  <p>1. <strong>Eligibility filter</strong> — remove players born after September 15 of the primary birth year (e.g., for 2026 draft: born after Sept 15, 2008 → goes to 2027 class). This caught 106 players in the 2026 class audit alone, including top 2027 prospects like Dima Zhilkin and Jaxon Jacobson.<br>
+  2. <strong>Deduplication</strong> — merge accent/spelling variants (e.g., "Björck" + "Bjorck" → single entry with combined source tags).<br>
+  3. <strong>Force-assign</strong> franchise players (user-specified, e.g., McKenna/Stenberg = -10 for 2026).<br>
+  4. <strong>Composite ranking</strong> — sort by source priority, with TSN grade and random tiebreaking for same-priority players.<br>
+  5. <strong>Position-aware fill</strong> — for each tier, fill each position's slots from the sorted pool until targets are met. Goalies are <em>promoted</em> from deeper in the pool since EP Consolidated notoriously underranks netminders.<br>
+  6. <strong>Validate</strong> HTML-DB restrictions and assign all remaining to -12 filler.</p>
+
+  <h3>League Signal Bonus</h3>
+  <p>Beyond scouting rankings, the system incorporates an independent signal: <strong>how professional hockey organizations value each prospect</strong>. A player rated A- by TSN who also went Round 1 in the OHL Priority Selection has significantly more institutional validation than an identically-graded player with no draft history.</p>
+
+  <p>Each player receives one league signal tier — the highest applicable, no stacking:</p>
+
+  <table class="tier-table">
+    <thead>
+      <tr><th>Tier</th><th>Criteria</th><th>Bonus</th><th>Impact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong style="color:var(--accent-amber)">USNTDP</strong></td><td>USA Hockey NTDP Juniors</td><td>+3</td><td>National-level selection by USA Hockey — equivalent to CHL Rd 1</td></tr>
+      <tr><td><strong style="color:var(--accent-amber)">CHL Draft Rd 1</strong></td><td>OHL/WHL/QMJHL/Import Rd 1</td><td>+3</td><td>A CHL franchise invested a premium pick on this player</td></tr>
+      <tr><td><strong style="color:var(--accent-blue)">CHL Draft Rd 2–3</strong></td><td>OHL/WHL/QMJHL/Import Rd 2–3</td><td>+2</td><td>Meaningful draft capital spent</td></tr>
+      <tr><td><strong style="color:var(--accent-cyan)">CHL Draft Rd 4–6</strong></td><td>OHL/WHL/QMJHL Rd 4–6</td><td>+1.5</td><td>Mid-round CHL draft investment</td></tr>
+      <tr><td><strong style="color:var(--text-secondary)">CHL Draft Rd 7+</strong></td><td>OHL/WHL/QMJHL Rd 7+</td><td>+1</td><td>Late-round CHL selection</td></tr>
+      <tr><td><strong style="color:var(--text-secondary)">Major Junior Rights</strong></td><td>OHL/WHL/QMJHL/USHL rights (not drafted)</td><td>+1</td><td>A junior team listed this player on their rights roster</td></tr>
+      <tr><td><strong style="color:var(--text-muted)">AAA Junior Rights</strong></td><td>BCHL/AJHL/NAHL/CCHL/OJHL etc.</td><td>+0.5</td><td>Lower-tier junior validation</td></tr>
+    </tbody>
+  </table>
+
+  <p>The bonus adds to the player's <em>effective source count</em>, which feeds the composite ranking algorithm. A TSN-only player (1 source) with a CHL Rd 1 draft effectively becomes a 4-source player — likely bumping from -12 filler to -17 mid-round territory. This is not a direct PA adjustment; it flows through the existing ranking pipeline as additional source credibility.</p>
+
+  <h3>Draft Class Coverage</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon amber">🏆</div>
+        <div class="card-title">2026 Class</div>
+      </div>
+      <p>Fully scouted with CSS midterm rankings, EP consolidated, Scott Wheeler, and multiple community sources. 2,538 total prospects, 410 non-filler. Updated with CSS Mid-Season Players to Watch and EP Players to Watch lists. 106 late-2008 births correctly moved to 2027.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon purple">📋</div>
+        <div class="card-title">2027–2028 Classes</div>
+      </div>
+      <p>Early notables set from EP scouting lists and emerging community consensus. Top 4 tiers populated (-10 through -8); mid-round fill from TSN grades with League Signal Bonus differentiation. Position-flexible forward assignments for undeclared positions.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon cyan">🔭</div>
+        <div class="card-title">2029–2030 Classes</div>
+      </div>
+      <p>Early scouting phase. 2029 has top 4 tiers set with Prospect Generator populating remaining slots. 2030 is a complete 50/50 non-filler prospect database (529 total players) with tier-based color-coded import Excel. Both delivered via full 2026–2030 dark-themed HTML dashboard (1,656 players).</p>
+    </div>
+  </div>
+
+  <h3>Nationality Targets</h3>
+  <p>Each draft class targets approximately <strong>66% North American / 33% European+Other</strong> representation, reflecting real-world NHL draft composition. For international players not naturally surfacing through rankings, an international scoring formula identifies Europeans who deserve inclusion:</p>
+  <div class="formula-block">
+    <div class="formula-label">International Surfacing Formula</div>
+    <div class="formula">Score = IntlApps × 8 + (CA − 30) × 0.8 + league_tier_bonus</div>
+  </div>
+  <p>Qualifying internationals swap into the ranked pool, replacing the weakest CHL/USHL tail entries to maintain the target ratio.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 11: KNOWN LIMITATIONS                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="limitations">
+  <div class="section-label">Section 11</div>
+  <h2>Known Limitations &amp; Roadmap</h2>
+
+  <h3>Current Limitations</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon red">📉</div>
+        <div class="card-title">AHL Data Depth</div>
+      </div>
+      <p>AHL ratings are constrained by the single-source AHLTracker data. No xG models, no RAPM, no tracking data. AHL ratings will always be less precise than NHL ratings until better data sources emerge.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon amber">🌍</div>
+        <div class="card-title">European Leagues</div>
+      </div>
+      <p>The pipeline currently covers only NHL and AHL. European leagues (SHL, Liiga, DEL, NL) with robust analytics data are natural extension targets but require league-specific calibration.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon purple">🧠</div>
+        <div class="card-title">Mental Attributes</div>
+      </div>
+      <p>Ambition, Loyalty, and Leadership remain at database defaults. These personality-type attributes lack reliable data proxies and are better left to game engine randomization for realistic variety.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon cyan">📊</div>
+        <div class="card-title">Single-Season Snapshot</div>
+      </div>
+      <p>The pipeline primarily models current-season performance. Players having career-worst or career-best seasons will be rated accordingly, moderated only by career floors and deployment minimums.</p>
+    </div>
+  </div>
+
+  <h3>What's Next</h3>
+  <p>• <strong>Diff tracking between runs</strong> — a tool to show exactly what changed for each player between data refreshes, making targeted manual adjustments easier<br>
+  • <strong>European league models</strong> — extending the pipeline to SHL, DEL, Liiga, and NL using the established architecture<br>
+  • <strong>Additional AHL data sources</strong> — investigating Elite Prospects for TOI supplementation<br>
+  • <strong>GitHub integration</strong> — all scripts and data documentation published for community review and contribution<br>
+  • <strong>Phase 5b v2</strong> — enhanced mental modeling using Elite Prospects career data (captaincy, awards, draft history) for Leadership, Loyalty, and Ambition</p>
+</section>
+
+</div><!-- end .content -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  FOOTER                                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <p>
+    <strong>Pivot/TBL Re-Rates Pipeline</strong> — vNext (February 2026)<br>
+    Maintained by <a href="#">xECK29x</a> · Modeling assistant: Claude (Anthropic)<br>
+    Coverage: 825 NHL + 987 AHL = 1,675 players · Data snapshot: 2024–25 season through Olympic break
+  </p>
+  <p style="margin-top:1rem">
+    For questions, feedback, or to report issues: EHM Forums · <a href="https://reddit.com/r/EHM">r/EHM</a> · GitHub (coming soon)
+  </p>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SCRIPTS                                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<script>
+// Nav scroll effect
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Active nav link tracking
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+      });
+    }
+  });
+}, { rootMargin: '-80px 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+
+// Phase accordion
+function togglePhase(header) {
+  const section = header.closest('.phase-section');
+  const wasOpen = section.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.phase-section').forEach(s => s.classList.remove('open'));
+  // Toggle clicked
+  if (!wasOpen) section.classList.add('open');
+}
+
+// Pipeline step clicks
+function scrollToPhase(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const header = el.querySelector('.phase-header');
+    if (header && !el.classList.contains('open')) togglePhase(header);
+  }
+}
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Close mobile nav on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.querySelector('.nav-links').classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>

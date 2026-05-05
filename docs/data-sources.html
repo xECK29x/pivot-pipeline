@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Sources by League — Pivot Pipeline</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg-deep: #0a0e17;
+    --bg-surface: #111827;
+    --bg-card: #1a2236;
+    --bg-elevated: #1f2a42;
+    --border: #2a3654;
+    --text-primary: #e8ecf4;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --gradient-hero: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1a1033 100%);
+    --gradient-accent: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --font-display: 'Outfit', system-ui, sans-serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,23,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1400px; margin: 0 auto;
+    padding: 0 2rem; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 1.05rem; color: var(--text-primary);
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .nav-brand .logo {
+    width: 32px; height: 32px;
+    background: var(--gradient-accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.9rem; color: white;
+  }
+  .nav-links { display: flex; gap: 0.25rem; list-style: none; }
+  .nav-links a {
+    font-family: var(--font-display);
+    font-size: 0.85rem; font-weight: 500;
+    color: var(--text-muted);
+    padding: 0.4rem 0.85rem; border-radius: 6px;
+  }
+  .nav-links a:hover {
+    color: var(--text-primary); background: var(--bg-card);
+    text-decoration: none;
+  }
+
+  .hero {
+    background: var(--gradient-hero);
+    padding: 5rem 2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(6,182,212,0.10) 0%, transparent 60%);
+  }
+  .hero-inner {
+    max-width: 1400px; margin: 0 auto;
+    position: relative; z-index: 1;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem; color: var(--accent-cyan);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 40px; height: 2px; background: var(--gradient-accent);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    font-weight: 800; line-height: 1.1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #e8ecf4 0%, #94a3b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 1.1rem; color: var(--text-secondary);
+    max-width: 800px;
+  }
+
+  /* SIDEBAR LAYOUT */
+  .layout {
+    max-width: 1400px; margin: 0 auto;
+    padding: 2.5rem 2rem;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 3rem;
+  }
+  .sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+  .sidebar-title {
+    font-family: var(--font-display);
+    font-size: 0.7rem; font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin-bottom: 0.75rem; padding-left: 0.75rem;
+  }
+  .sidebar-group {
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-link {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem; font-weight: 500;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    transition: all 0.15s;
+    margin-bottom: 0.15rem;
+  }
+  .sidebar-link:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .sidebar-link.active {
+    background: rgba(59,130,246,0.12);
+    color: var(--accent-blue);
+  }
+  .sidebar-flag { font-size: 1.1rem; }
+
+  .main { min-width: 0; }
+
+  /* LEAGUE SECTIONS */
+  .league-section {
+    margin-bottom: 5rem;
+    padding-top: 1rem;
+  }
+  .league-header {
+    display: flex; align-items: center; gap: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .league-flag {
+    font-size: 2.5rem;
+  }
+  .league-title-block { flex: 1; }
+  .league-name {
+    font-family: var(--font-display);
+    font-size: 1.85rem; font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .league-leagues {
+    font-family: var(--font-mono);
+    font-size: 0.75rem; color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .league-stats {
+    display: flex; gap: 1.5rem;
+    font-size: 0.85rem;
+  }
+  .league-stat {
+    text-align: right;
+  }
+  .league-stat-val {
+    font-family: var(--font-display);
+    font-weight: 700; color: var(--text-primary);
+    font-size: 1rem;
+  }
+  .league-stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .league-summary {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0 2rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  .league-summary strong { color: var(--text-primary); }
+
+  /* DATA SIGNAL TAGS */
+  .signal-row {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+    margin: 1rem 0;
+  }
+  .signal-tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; font-weight: 600;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    color: var(--text-secondary);
+  }
+  .signal-tag.unique {
+    border-color: var(--accent-emerald);
+    background: rgba(16,185,129,0.08);
+    color: var(--accent-emerald);
+  }
+  .signal-tag.absent {
+    background: var(--bg-deep);
+    color: var(--text-muted);
+    text-decoration: line-through;
+    border-color: rgba(42,54,84,0.5);
+  }
+
+  /* PLAYER CARDS */
+  .players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  .player-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .player-card.F::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent-blue);
+  }
+  .player-card.D::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent-purple);
+  }
+  .player-card.G::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent-pink);
+  }
+  .pos-badge {
+    position: absolute; top: 1rem; right: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .pos-badge.F { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .pos-badge.D { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+  .pos-badge.G { background: rgba(236,72,153,0.15); color: var(--accent-pink); }
+
+  .player-name {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1.15rem;
+    margin-bottom: 0.25rem;
+    padding-right: 3rem;
+  }
+  .player-meta {
+    font-size: 0.82rem; color: var(--text-muted);
+    margin-bottom: 1rem;
+    display: flex; flex-wrap: wrap; gap: 0.4rem 0.85rem;
+  }
+  .player-meta-item {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+  }
+  .player-meta-item::before {
+    content: '·'; color: var(--text-muted); margin-right: 0.4rem;
+  }
+  .player-meta-item:first-child::before { display: none; }
+
+  .player-tier {
+    font-family: var(--font-display);
+    font-size: 0.75rem; font-weight: 600;
+    color: var(--accent-amber);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .player-role {
+    font-family: var(--font-display);
+    font-size: 0.85rem; color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ca-pa-row {
+    display: flex; gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .ca-pa-cell {
+    flex: 1;
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+  }
+  .ca-pa-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .ca-pa-val {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1.5rem;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-top: 0.25rem;
+  }
+  .ca-pa-val.high { color: var(--accent-amber); }
+
+  /* ATTRIBUTE GRID */
+  .attrs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+  }
+  .attr-row {
+    display: flex; align-items: center;
+    gap: 0.5rem; font-size: 0.78rem;
+  }
+  .attr-name {
+    flex: 1; color: var(--text-secondary);
+    font-family: var(--font-display);
+  }
+  .attr-bar {
+    width: 60px; height: 4px;
+    background: var(--bg-deep);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .attr-bar-fill {
+    height: 100%; border-radius: 2px;
+  }
+  .attr-val {
+    font-family: var(--font-mono);
+    font-weight: 700; font-size: 0.78rem;
+    color: var(--text-primary);
+    min-width: 18px;
+    text-align: right;
+  }
+  .attr-val.elite { color: var(--accent-amber); }
+  .attr-val.high { color: var(--accent-emerald); }
+  .attr-val.low { color: var(--text-muted); }
+
+  /* WHAT THE DATA SAYS */
+  .insight-box {
+    background: rgba(6,182,212,0.06);
+    border: 1px solid rgba(6,182,212,0.15);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .insight-label {
+    font-family: var(--font-display);
+    font-size: 0.65rem; font-weight: 700;
+    color: var(--accent-cyan);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+
+  /* Scrollbar styling */
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem; text-align: center;
+    color: var(--text-muted); font-size: 0.85rem;
+  }
+  footer a { color: var(--text-secondary); }
+
+  @media (max-width: 1024px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+  @media (max-width: 768px) {
+    .nav-links a:not(:last-child) { display: none; }
+    .hero { padding: 3.5rem 1.5rem 2.5rem; }
+    .layout { padding: 2rem 1.5rem; }
+    .league-header { flex-wrap: wrap; }
+    .league-stats { width: 100%; justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="./" style="text-decoration:none">
+      <div class="nav-brand">
+        <div class="logo">P</div>
+        <span>Pivot Pipeline</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="./">Home</a></li>
+      <li><a href="pipeline-guide.html">Pipeline Guide</a></li>
+      <li><a href="pipeline-flow.html">Pipeline Flow</a></li>
+      <li><a href="https://github.com/xECK29x/pivot-pipeline">GitHub →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Per-League Reference</div>
+    <h1>Data Sources by League</h1>
+    <p>Each of the 17 league pipelines reads from the data its league actually tracks. Below is what each one uses, with three real example players per league — the top-rated forward, defenseman, and goalie — showing what the data actually drove.</p>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-title">North America Pro</div>
+    <div class="sidebar-group">
+      <a href="#NHL" class="sidebar-link"><span class="sidebar-flag">🇨🇦🇺🇸</span>NHL</a>
+      <a href="#AHL" class="sidebar-link"><span class="sidebar-flag">🇨🇦🇺🇸</span>AHL</a>
+      <a href="#ECHL" class="sidebar-link"><span class="sidebar-flag">🇺🇸</span>ECHL</a>
+      <a href="#SPHL" class="sidebar-link"><span class="sidebar-flag">🇺🇸</span>SPHL</a>
+    </div>
+
+    <div class="sidebar-title">European Pro</div>
+    <div class="sidebar-group">
+      <a href="#SWE" class="sidebar-link"><span class="sidebar-flag">🇸🇪</span>Sweden</a>
+      <a href="#FIN" class="sidebar-link"><span class="sidebar-flag">🇫🇮</span>Finland</a>
+      <a href="#GER" class="sidebar-link"><span class="sidebar-flag">🇩🇪</span>Germany</a>
+      <a href="#CZE" class="sidebar-link"><span class="sidebar-flag">🇨🇿</span>Czechia</a>
+      <a href="#SUI" class="sidebar-link"><span class="sidebar-flag">🇨🇭</span>Switzerland</a>
+      <a href="#SVK" class="sidebar-link"><span class="sidebar-flag">🇸🇰</span>Slovakia</a>
+      <a href="#RUS" class="sidebar-link"><span class="sidebar-flag">🇷🇺</span>Russia</a>
+    </div>
+
+    <div class="sidebar-title">Junior / College</div>
+    <div class="sidebar-group">
+      <a href="#OHL" class="sidebar-link"><span class="sidebar-flag">🇨🇦</span>OHL</a>
+      <a href="#WHL" class="sidebar-link"><span class="sidebar-flag">🇨🇦</span>WHL</a>
+      <a href="#QMJHL" class="sidebar-link"><span class="sidebar-flag">🇨🇦</span>QMJHL</a>
+      <a href="#NCAA" class="sidebar-link"><span class="sidebar-flag">🇺🇸</span>NCAA</a>
+      <a href="#USHL" class="sidebar-link"><span class="sidebar-flag">🇺🇸</span>USHL</a>
+      <a href="#NAHL" class="sidebar-link"><span class="sidebar-flag">🇺🇸</span>NAHL</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="main"></main>
+
+</div>
+
+<footer>
+  <p>
+    <strong>Pivot Pipeline</strong> · Data Sources by League<br>
+    <a href="./">Home</a> · <a href="pipeline-guide.html">Pipeline Guide</a> · <a href="pipeline-flow.html">Pipeline Flow</a> · <a href="https://github.com/xECK29x/pivot-pipeline">GitHub</a>
+  </p>
+</footer>
+
+<script>
+// ═══ EMBEDDED PLAYER PROFILES (from masters) ═══
+const PROFILES = {"NHL": {"F": {"name": "Connor McDavid", "club": "EDM", "CA": 195, "PA": 200, "tier": "Medium NHL Franchise F", "role": "Centre: Playmaker (finesse)", "nat": "Canada", "attrs": {"Wristshot": 18, "Slapshot": 19, "Passing": 20, "Stickhandling": 20, "Acceleration": 20, "Pace": 20, "Hitting": 8, "Positioning": 8, "Anticipation": 20, "Decisions": 19, "Creativity": 20, "WorkRate": 20}, "gp": 81}, "D": {"name": "Zach Werenski", "club": "CBJ", "CA": 199, "PA": 194, "tier": "Medium NHL Franchise D", "role": "Defenceman: Offensive (finesse)", "nat": "United States", "attrs": {"Wristshot": 18, "Slapshot": 19, "Passing": 19, "Stickhandling": 19, "Acceleration": 19, "Pace": 19, "Hitting": 9, "Positioning": 15, "Anticipation": 20, "Decisions": 20, "Creativity": 19, "WorkRate": 20}, "gp": 75}, "G": {"name": "Logan Thompson", "club": "WSH", "CA": 200, "PA": 194, "tier": "High NHL Franchise", "role": "Goalie: Mixed", "nat": "Canada", "attrs": {"Reflexes": 19, "Positioning": 19, "Glove": 19, "Blocker": 19, "Recovery": 14, "Rebounds": 11, "OneOnOnes": 19, "Agility": 19}, "gp": 58}}, "AHL": {"F": {"name": "Easton Cowan", "club": "Toronto Maple Leafs", "CA": 119, "PA": -9, "tier": "High AHL Top 6 F", "role": "Winger: All around", "nat": "Canada", "attrs": {"Wristshot": 11, "Slapshot": 11, "Passing": 13, "Stickhandling": 13, "Acceleration": 12, "Pace": 13, "Hitting": 10, "Positioning": 11, "Anticipation": 15, "Decisions": 13, "Creativity": 0, "WorkRate": 15}, "gp": null}, "D": {"name": "Ethan Bear", "club": "New York Islanders", "CA": 119, "PA": 123, "tier": "High AHL Top Pair D", "role": "Defenceman: Pointman", "nat": "Canada", "attrs": {"Wristshot": 9, "Slapshot": 11, "Passing": 11, "Stickhandling": 10, "Acceleration": 9, "Pace": 10, "Hitting": 6, "Positioning": 9, "Anticipation": 0, "Decisions": 0, "Creativity": 0, "WorkRate": 12}, "gp": null}, "G": {"name": "Michael DiPietro", "club": "Boston Bruins", "CA": 135, "PA": -8, "tier": "Medium NHL Backup 2B G", "role": "Goalie: Butterfly", "nat": "Canada", "attrs": {"Reflexes": 15, "Positioning": 16, "Glove": 15, "Blocker": 14, "Recovery": 15, "Rebounds": 15, "OneOnOnes": 16, "Agility": 16}, "gp": null}}, "SWE": {"F": {"name": "Jakob Silfverberg", "club": "Brynäs IF", "CA": 120, "PA": 120, "tier": "SHL Elite F", "role": "Winger: All around", "nat": "Sweden", "attrs": {"Wristshot": 11, "Slapshot": 10, "Passing": 11, "Stickhandling": 11, "Acceleration": 11, "Pace": 11, "Hitting": 9, "Positioning": 12, "Anticipation": 18, "Decisions": 0, "Creativity": 11, "WorkRate": 10}, "gp": null}, "D": {"name": "Johannes Kinnvall", "club": "Brynäs IF", "CA": 120, "PA": 124, "tier": "SHL Elite D", "role": "Defenceman: Offensive", "nat": "Sweden", "attrs": {"Wristshot": 11, "Slapshot": 11, "Passing": 14, "Stickhandling": 12, "Acceleration": 11, "Pace": 11, "Hitting": 9, "Positioning": 11, "Anticipation": 18, "Decisions": 0, "Creativity": 12, "WorkRate": 10}, "gp": null}, "G": {"name": "Strauss Mann", "club": "Skellefteå AIK", "CA": 120, "PA": 126, "tier": "SHL Elite G", "role": "Goalie: Butterfly", "nat": "United States", "attrs": {"Reflexes": 14, "Positioning": 13, "Glove": 12, "Blocker": 13, "Recovery": 13, "Rebounds": 11, "OneOnOnes": 14, "Agility": 14}, "gp": null}}, "FIN": {"F": {"name": "Aku Räty", "club": "Oulun Kärpät", "CA": 110, "PA": 124, "tier": "LIIGA Elite F", "role": "Winger: Playmaker", "nat": "Finland", "attrs": {"Wristshot": 11, "Slapshot": 10, "Passing": 12, "Stickhandling": 11, "Acceleration": 11, "Pace": 11, "Hitting": 6, "Positioning": 10, "Anticipation": 18, "Decisions": 0, "Creativity": 11, "WorkRate": 16}, "gp": null}, "D": {"name": "Sami Vatanen", "club": "Jyväskylän JYP", "CA": 109, "PA": 109, "tier": "LIIGA Elite D", "role": "Defenceman: Offensive", "nat": "Finland", "attrs": {"Wristshot": 10, "Slapshot": 11, "Passing": 13, "Stickhandling": 11, "Acceleration": 13, "Pace": 13, "Hitting": 8, "Positioning": 9, "Anticipation": 15, "Decisions": 0, "Creativity": 10, "WorkRate": 14}, "gp": null}, "G": {"name": "Christian Heljanko", "club": "Tampereen Tappara", "CA": 110, "PA": 114, "tier": "LIIGA Elite G", "role": "Goalie: Butterfly", "nat": "Finland", "attrs": {"Reflexes": 13, "Positioning": 13, "Glove": 12, "Blocker": 13, "Recovery": 14, "Rebounds": 12, "OneOnOnes": 14, "Agility": 14}, "gp": null}}, "GER": {"F": {"name": "Kenny Agostino", "club": "ERC Ingolstadt", "CA": 110, "PA": 110, "tier": "DEL Elite F", "role": "Winger: Playmaker (finesse)", "nat": "United States", "attrs": {"Wristshot": 10, "Slapshot": 10, "Passing": 10, "Stickhandling": 12, "Acceleration": 15, "Pace": 15, "Hitting": 4, "Positioning": 10, "Anticipation": 18, "Decisions": 0, "Creativity": 10, "WorkRate": 14}, "gp": null}, "D": {"name": "Alex Breton", "club": "ERC Ingolstadt", "CA": 110, "PA": 114, "tier": "DEL Elite D", "role": "Defenceman: Offensive (finesse)", "nat": "Canada", "attrs": {"Wristshot": 11, "Slapshot": 10, "Passing": 13, "Stickhandling": 14, "Acceleration": 17, "Pace": 16, "Hitting": 5, "Positioning": 9, "Anticipation": 18, "Decisions": 0, "Creativity": 12, "WorkRate": 15}, "gp": null}, "G": {"name": "Janne Juvonen", "club": "Kölner Haie", "CA": 110, "PA": 110, "tier": "DEL Elite G", "role": "Goalie: Mixed", "nat": "Finland", "attrs": {"Reflexes": 11, "Positioning": 12, "Glove": 12, "Blocker": 11, "Recovery": 11, "Rebounds": 12, "OneOnOnes": 11, "Agility": 14}, "gp": null}}, "CZE": {"F": {"name": "Roman Cervenka", "club": "HC Dynamo Pardubice", "CA": 109, "PA": 109, "tier": "ELH Elite F", "role": "Centre: Playmaker", "nat": "Czechia", "attrs": {"Wristshot": 10, "Slapshot": 10, "Passing": 13, "Stickhandling": 11, "Acceleration": 10, "Pace": 10, "Hitting": 4, "Positioning": 8, "Anticipation": 18, "Decisions": 0, "Creativity": 11, "WorkRate": 10}, "gp": null}, "D": {"name": "Jan Kostalek", "club": "HC Vítkovice Ridera", "CA": 110, "PA": 110, "tier": "ELH Elite D", "role": "Defenceman: Offensive (finesse)", "nat": "Czechia", "attrs": {"Wristshot": 11, "Slapshot": 10, "Passing": 12, "Stickhandling": 12, "Acceleration": 12, "Pace": 13, "Hitting": 4, "Positioning": 10, "Anticipation": 18, "Decisions": 0, "Creativity": 12, "WorkRate": 10}, "gp": null}, "G": {"name": "Stanislav Skorvanek", "club": "Mountfield HK Hradec Králové", "CA": 110, "PA": 112, "tier": "ELH Elite G", "role": "Goalie: Hybrid/Unorthodox", "nat": "Slovakia", "attrs": {"Reflexes": 13, "Positioning": 13, "Glove": 13, "Blocker": 12, "Recovery": 13, "Rebounds": 13, "OneOnOnes": 13, "Agility": 14}, "gp": null}}, "SUI": {"F": {"name": "Denis Malgin", "club": "ZSC Lions", "CA": 120, "PA": 124, "tier": "NL Elite F", "role": "Centre: Sniper", "nat": "Switzerland", "attrs": {"Wristshot": 13, "Slapshot": 11, "Passing": 11, "Stickhandling": 11, "Acceleration": 15, "Pace": 17, "Hitting": 6, "Positioning": 10, "Anticipation": 17, "Decisions": 0, "Creativity": 10, "WorkRate": 11}, "gp": null}, "D": {"name": "Erik Brännström", "club": "Lausanne HC", "CA": 120, "PA": 128, "tier": "NL Elite D", "role": "Defenceman: Offensive", "nat": "Sweden", "attrs": {"Wristshot": 11, "Slapshot": 13, "Passing": 11, "Stickhandling": 10, "Acceleration": 17, "Pace": 17, "Hitting": 8, "Positioning": 11, "Anticipation": 17, "Decisions": 0, "Creativity": 11, "WorkRate": 12}, "gp": null}, "G": {"name": "Simon Hrubec", "club": "ZSC Lions", "CA": 120, "PA": 120, "tier": "NL Elite G", "role": "Goalie: Butterfly", "nat": "Czechia", "attrs": {"Reflexes": 14, "Positioning": 14, "Glove": 12, "Blocker": 14, "Recovery": 14, "Rebounds": 13, "OneOnOnes": 14, "Agility": 14}, "gp": null}}, "SVK": {"F": {"name": "Patrik Marcinek", "club": "HKM Zvolen", "CA": 89, "PA": 95, "tier": "SVK Elite F", "role": "Centre: Power forward", "nat": "Slovakia", "attrs": {"Wristshot": 9, "Slapshot": 10, "Passing": 8, "Stickhandling": 8, "Acceleration": 0, "Pace": 0, "Hitting": 9, "Positioning": 9, "Anticipation": 14, "Decisions": 0, "Creativity": 8, "WorkRate": 9}, "gp": null}, "D": {"name": "Ryan Sproul", "club": "HK Poprad", "CA": 90, "PA": 90, "tier": "SVK Elite D", "role": "Defenceman: Pointman", "nat": "Canada", "attrs": {"Wristshot": 8, "Slapshot": 8, "Passing": 8, "Stickhandling": 8, "Acceleration": 0, "Pace": 0, "Hitting": 6, "Positioning": 8, "Anticipation": 16, "Decisions": 0, "Creativity": 8, "WorkRate": 9}, "gp": null}, "G": {"name": "Jasper Patrikainen", "club": "HK Nitra", "CA": 90, "PA": -6, "tier": "SVK Elite G", "role": "Goalie: Butterfly", "nat": "Finland", "attrs": {"Reflexes": 14, "Positioning": 14, "Glove": 14, "Blocker": 14, "Recovery": 14, "Rebounds": 13, "OneOnOnes": 14, "Agility": 14}, "gp": null}}, "RUS": {"F": {"name": "Vitali Kravtsov", "club": "Traktor Chelyabinsk", "CA": 129, "PA": 137, "tier": "KHL Elite F", "role": "Winger: Sniper (physical)", "nat": "Russia", "attrs": {"Wristshot": 18, "Slapshot": 18, "Passing": 12, "Stickhandling": 12, "Acceleration": 16, "Pace": 16, "Hitting": 11, "Positioning": 9, "Anticipation": 13, "Decisions": 0, "Creativity": 10, "WorkRate": 11}, "gp": null}, "D": {"name": "Damir Sharipzyanov", "club": "Avangard Omsk", "CA": 130, "PA": 132, "tier": "KHL Elite D", "role": "Defenceman: Standard", "nat": "Russia", "attrs": {"Wristshot": 16, "Slapshot": 16, "Passing": 11, "Stickhandling": 11, "Acceleration": 11, "Pace": 12, "Hitting": 10, "Positioning": 11, "Anticipation": 14, "Decisions": 0, "Creativity": 11, "WorkRate": 12}, "gp": null}, "G": {"name": "Daniil Isayev", "club": "Lokomotiv Yaroslavl", "CA": 130, "PA": -8, "tier": "KHL Elite G", "role": "Goalie: Mixed", "nat": "Russia", "attrs": {"Reflexes": 11, "Positioning": 11, "Glove": 11, "Blocker": 10, "Recovery": 11, "Rebounds": 11, "OneOnOnes": 11, "Agility": 12}, "gp": null}}, "OHL": {"F": {"name": "Jack Pridham", "club": "Kitchener Rangers", "CA": 100, "PA": -18, "tier": "CHL Elite F", "role": "Winger: Sniper", "nat": "Canada", "attrs": {"Wristshot": 14, "Slapshot": 12, "Passing": 13, "Stickhandling": 13, "Acceleration": 13, "Pace": 15, "Hitting": 6, "Positioning": 11, "Anticipation": 13, "Decisions": 13, "Creativity": 12, "WorkRate": 13}, "gp": null}, "D": {"name": "Kashawn Aitcheson", "club": "Barrie Colts", "CA": 100, "PA": -9, "tier": "OHL → ELC (New York Islanders)", "role": "Defenceman: Pointman (physical)", "nat": "Canada", "attrs": {"Wristshot": 13, "Slapshot": 14, "Passing": 14, "Stickhandling": 12, "Acceleration": 12, "Pace": 13, "Hitting": 16, "Positioning": 13, "Anticipation": 14, "Decisions": 11, "Creativity": 12, "WorkRate": 14}, "gp": null}, "G": {"name": "Ryder Fetterolf", "club": "Ottawa 67's", "CA": 100, "PA": -17, "tier": "CHL Starter 1A G", "role": "Goalie: Butterfly", "nat": "United States", "attrs": {"Reflexes": 15, "Positioning": 15, "Glove": 15, "Blocker": 15, "Recovery": 15, "Rebounds": 13, "OneOnOnes": 15, "Agility": 15}, "gp": null}}, "WHL": {"F": {"name": "Alex Weiermair", "club": "Portland Winterhawks", "CA": 100, "PA": -17, "tier": "WHL → ELC (Vegas Golden Knights)", "role": "Centre: All around", "nat": "United States", "attrs": {"Wristshot": 12, "Slapshot": 10, "Passing": 12, "Stickhandling": 11, "Acceleration": 13, "Pace": 14, "Hitting": 9, "Positioning": 10, "Anticipation": 17, "Decisions": 17, "Creativity": 11, "WorkRate": 0}, "gp": null}, "D": {"name": "Bryce Pickford", "club": "Montréal Canadiens", "CA": 100, "PA": -19, "tier": "CHL Elite D", "role": "Defenceman: Pointman", "nat": "Canada", "attrs": {"Wristshot": 13, "Slapshot": 14, "Passing": 12, "Stickhandling": 12, "Acceleration": 0, "Pace": 0, "Hitting": 7, "Positioning": 11, "Anticipation": 14, "Decisions": 16, "Creativity": 11, "WorkRate": 16}, "gp": null}, "G": {"name": "Joshua Ravensbergen", "club": "Prince George Cougars", "CA": 100, "PA": -20, "tier": "CHL Starter 1A G", "role": "Goalie: Mixed", "nat": "Canada", "attrs": {"Reflexes": 17, "Positioning": 15, "Glove": 15, "Blocker": 15, "Recovery": 15, "Rebounds": 15, "OneOnOnes": 15, "Agility": 15}, "gp": null}}, "QMJHL": {"F": {"name": "Vincent Desjardins", "club": "Blainville-Boisbriand Armada", "CA": 100, "PA": -6, "tier": "CHL Elite F", "role": "Centre: Playmaker (finesse)", "nat": "Canada", "attrs": {"Wristshot": 10, "Slapshot": 9, "Passing": 13, "Stickhandling": 12, "Acceleration": 0, "Pace": 0, "Hitting": 4, "Positioning": 9, "Anticipation": 0, "Decisions": 0, "Creativity": 11, "WorkRate": 0}, "gp": null}, "D": {"name": "Jordan Tourigny", "club": "Chicoutimi Saguenéens", "CA": 100, "PA": -6, "tier": "CHL Elite D", "role": "Defenceman: Offensive (finesse)", "nat": "Canada", "attrs": {"Wristshot": 10, "Slapshot": 9, "Passing": 11, "Stickhandling": 11, "Acceleration": 0, "Pace": 0, "Hitting": 4, "Positioning": 9, "Anticipation": 0, "Decisions": 0, "Creativity": 11, "WorkRate": 0}, "gp": null}, "G": {"name": "Rudy Guimond", "club": "Moncton Wildcats", "CA": 100, "PA": -18, "tier": "CHL Starter 1A G", "role": "Goalie: Butterfly", "nat": "Canada", "attrs": {"Reflexes": 15, "Positioning": 15, "Glove": 15, "Blocker": 15, "Recovery": 15, "Rebounds": 15, "OneOnOnes": 15, "Agility": 15}, "gp": null}}, "NCAA": {"F": {"name": "Max Plante", "club": "University of Minnesota-Duluth Bulldogs", "CA": 100, "PA": -8, "tier": "CHL Elite F", "role": "Winger: Playmaker", "nat": "United States", "attrs": {"Wristshot": 13, "Slapshot": 11, "Passing": 13, "Stickhandling": 14, "Acceleration": 15, "Pace": 15, "Hitting": 7, "Positioning": 10, "Anticipation": 14, "Decisions": 15, "Creativity": 13, "WorkRate": 12}, "gp": null}, "D": {"name": "Eric Pohlkamp", "club": "University of Denver Pioneers", "CA": 100, "PA": -8, "tier": "NCAA → ELC (San Jose Sharks)", "role": "Defenceman: Pointman (physical)", "nat": "United States", "attrs": {"Wristshot": 12, "Slapshot": 13, "Passing": 11, "Stickhandling": 11, "Acceleration": 11, "Pace": 12, "Hitting": 14, "Positioning": 12, "Anticipation": 12, "Decisions": 10, "Creativity": 11, "WorkRate": 12}, "gp": null}, "G": {"name": "Michael Hrabal", "club": "University of Massachusetts-Amherst Minutemen", "CA": 98, "PA": -20, "tier": "NCAA → ELC (Utah Mammoth)", "role": "Goalie: Butterfly", "nat": "Czechia", "attrs": {"Reflexes": 15, "Positioning": 14, "Glove": 14, "Blocker": 14, "Recovery": 14, "Rebounds": 14, "OneOnOnes": 14, "Agility": 14}, "gp": null}}, "USHL": {"F": {"name": "Nicky Romeo", "club": "Cedar Rapids RoughRiders", "CA": 100, "PA": -6, "tier": "CHL Elite F", "role": "Winger: Sniper (finesse)", "nat": "United States", "attrs": {"Wristshot": 12, "Slapshot": 9, "Passing": 10, "Stickhandling": 11, "Acceleration": 0, "Pace": 0, "Hitting": 4, "Positioning": 9, "Anticipation": 0, "Decisions": 0, "Creativity": 10, "WorkRate": 0}, "gp": null}, "D": {"name": "Bode Laylin", "club": "Tri-City Storm", "CA": 100, "PA": -17, "tier": "CHL Elite D", "role": "Defenceman: Offensive", "nat": "United States", "attrs": {"Wristshot": 10, "Slapshot": 11, "Passing": 11, "Stickhandling": 10, "Acceleration": 0, "Pace": 0, "Hitting": 7, "Positioning": 9, "Anticipation": 0, "Decisions": 0, "Creativity": 11, "WorkRate": 0}, "gp": null}, "G": {"name": "Tobias Trejbal", "club": "Youngstown Phantoms", "CA": 100, "PA": -19, "tier": "CHL Starter 1A G", "role": "Goalie: Butterfly", "nat": "Czechia", "attrs": {"Reflexes": 15, "Positioning": 15, "Glove": 15, "Blocker": 15, "Recovery": 15, "Rebounds": 15, "OneOnOnes": 15, "Agility": 15}, "gp": null}}, "NAHL": {"F": {"name": "Oliver Barna", "club": "Fairbanks Ice Dogs", "CA": 78, "PA": -12, "tier": "NAHL Elite F", "role": "Winger: All around", "nat": "Hungary", "attrs": {"Wristshot": 9, "Slapshot": 8, "Passing": 9, "Stickhandling": 8, "Acceleration": 0, "Pace": 0, "Hitting": 6, "Positioning": 8, "Anticipation": 0, "Decisions": 0, "Creativity": 9, "WorkRate": 0}, "gp": null}, "D": {"name": "Noah Ziskie", "club": "Bismarck Bobcats", "CA": 76, "PA": -12, "tier": "NAHL First-Pair D", "role": "Defenceman: Offensive", "nat": "United States", "attrs": {"Wristshot": 9, "Slapshot": 9, "Passing": 9, "Stickhandling": 8, "Acceleration": 0, "Pace": 0, "Hitting": 7, "Positioning": 8, "Anticipation": 0, "Decisions": 0, "Creativity": 9, "WorkRate": 0}, "gp": null}, "G": {"name": "Jack Solomon", "club": "Austin Bruins", "CA": 80, "PA": -12, "tier": "NAHL Elite G", "role": "Goalie: Hybrid/Unorthodox", "nat": "United States", "attrs": {"Reflexes": 14, "Positioning": 14, "Glove": 13, "Blocker": 14, "Recovery": 14, "Rebounds": 12, "OneOnOnes": 14, "Agility": 14}, "gp": null}}, "ECHL": {"F": {"name": "Brandon Hawkins", "club": "Toledo Walleye", "CA": 90, "PA": 89, "tier": "High ECHL Top 6 F", "role": "Winger: Sniper (finesse)", "nat": "United States", "attrs": {"Wristshot": 10, "Slapshot": 9, "Passing": 10, "Stickhandling": 11, "Acceleration": 0, "Pace": 0, "Hitting": 7, "Positioning": 10, "Anticipation": 0, "Decisions": 0, "Creativity": 0, "WorkRate": 0}, "gp": null}, "D": {"name": "Nikita Sedov", "club": "Bloomington Bison", "CA": 90, "PA": 104, "tier": "High ECHL Top Pair D", "role": "Defenceman: Offensive", "nat": "Russia", "attrs": {"Wristshot": 7, "Slapshot": 7, "Passing": 12, "Stickhandling": 9, "Acceleration": 0, "Pace": 0, "Hitting": 7, "Positioning": 10, "Anticipation": 0, "Decisions": 0, "Creativity": 0, "WorkRate": 0}, "gp": null}, "G": {"name": "Dryden McKay", "club": "Bloomington Bison", "CA": 86, "PA": 90, "tier": "Medium ECHL Starter 1A G", "role": "Goalie: Mixed", "nat": "United States", "attrs": {"Reflexes": 9, "Positioning": 9, "Glove": 9, "Blocker": 8, "Recovery": 9, "Rebounds": 9, "OneOnOnes": 8, "Agility": 9}, "gp": null}}, "SPHL": {"F": {"name": "Leif Mattson", "club": "Quad City Storm", "CA": 80, "PA": 88, "tier": "Elite SPHL F", "role": "Winger: All around", "nat": "Canada", "attrs": {"Wristshot": 9, "Slapshot": 9, "Passing": 9, "Stickhandling": 8, "Acceleration": 0, "Pace": 0, "Hitting": 5, "Positioning": 9, "Anticipation": 0, "Decisions": 0, "Creativity": 0, "WorkRate": 0}, "gp": null}, "D": {"name": "Cory Dennis", "club": "Peoria Rivermen", "CA": 80, "PA": 84, "tier": "Elite SPHL D", "role": "Defenceman: Pointman", "nat": "United States", "attrs": {"Wristshot": 7, "Slapshot": 8, "Passing": 10, "Stickhandling": 8, "Acceleration": 0, "Pace": 0, "Hitting": 7, "Positioning": 11, "Anticipation": 0, "Decisions": 0, "Creativity": 0, "WorkRate": 0}, "gp": null}, "G": {"name": "Nick Latinovich", "club": "Peoria Rivermen", "CA": 75, "PA": 79, "tier": "High Good SPHL G", "role": "Goalie: Mixed", "nat": "Canada", "attrs": {"Reflexes": 10, "Positioning": 9, "Glove": 9, "Blocker": 9, "Recovery": 9, "Rebounds": 8, "OneOnOnes": 10, "Agility": 9}, "gp": null}}};
+
+// ═══ LEAGUE METADATA ═══
+const LEAGUES = [
+  {
+    code: 'NHL', flag: '🇨🇦🇺🇸', name: 'NHL',
+    sublabel: 'National Hockey League',
+    playerCount: '~880',
+    sourceCount: '20+',
+    summary: '<strong>The gold standard</strong> for analytics depth. Every signal that matters in modern hockey analysis is available — expected goals from multiple models, individual impact isolation via RAPM, full Goals-Above-Replacement decompositions, real puck-and-player tracking from the NHL EDGE camera system, and graded scouting-style context layers from LB Hockey and HockeyStatCards. With this many independent angles on each player, ratings can be triangulated and validated multiple ways.',
+    signals: {
+      unique: ['NHL EDGE tracking', 'RAPM isolation', 'GAR / xGAR decomposition', 'LB Hockey grades', 'HockeyStatCards O/D'],
+      common: ['xGF / xGA models', 'Possession (CF%/FF%)', 'Primary assists', 'Hits / Blocks / 60', 'Shot-type breakdown', 'Faceoff data + ELO', 'Goalie GSAx', 'Save % by location'],
+      missing: []
+    },
+    insights: {
+      F: 'McDavid\'s 20s in Anticipation, Creativity, Passing, Stickhandling, and WorkRate aren\'t the model getting carried away — every single one of those attributes has at least 5 independent signals supporting it (Evolving Hockey RAPM, MoneyPuck on-ice xGF, LB Transition + OZ Pressure, primary assist rates, etc.). The one place stats can\'t reach: 8 Hitting and 8 Positioning, exactly what you\'d expect from a 5\'11" finesse playmaker who plays a perimeter game.',
+      D: 'Werenski beat out Cale Makar for the top D suggestion on pure analytics. Why? Cale Makar had a slightly down year by his standards; Werenski had arguably the best season of his career. The pipeline doesn\'t care about reputation — it sees the 2025-26 numbers and says "this is the best defenseman this year." That\'s the value of an analytics-first approach.',
+      G: 'Logan Thompson at CA 200 is the model\'s most surprising call. His GSAx, high-danger save percentage, and EDGE positioning data all rated elite this season. Whether you agree with it or not, this is what a fully analytics-driven goalie evaluation produces — and it\'s why the system also flags ratings for QA review when they shift this dramatically.'
+    }
+  },
+  {
+    code: 'AHL', flag: '🇨🇦🇺🇸', name: 'AHL',
+    sublabel: 'American Hockey League',
+    playerCount: '~2,000',
+    sourceCount: '1',
+    summary: '<strong>The single-source challenge.</strong> AHL ratings come from one data source — AHLTracker — providing scoring, on-ice 5v5/PP/SH metrics, advanced stats, and penalties. There\'s no expected goals model, no RAPM isolation, no tracking data, and no WAR framework at the AHL level. The pipeline compensates by leaning heavily on PA-shaped score bands, role contracts, and the same career-history mental modeling used at the NHL level.',
+    signals: {
+      unique: [],
+      common: ['Scoring (5v5 + PP)', 'On-ice metrics', 'Penalties', 'Captaincy + career history', 'EP style tags'],
+      missing: ['xG models', 'RAPM', 'GSAx', 'EDGE tracking', 'LB grades', 'FO data', 'Hits/Blocks per game']
+    },
+    insights: {
+      F: 'Easton Cowan at AHL Top 6 with full Toronto pedigree. The CA 119 is the AHL ceiling for a non-NHL-callup forward — anything above this would imply NHL-callup deployment, which the system reserves for actual NHL data. Career signals from his Memorial Cup-winning OHL run carry into his Determination and ImportantMatches ratings.',
+      D: 'Ethan Bear is a former NHL regular working back through the AHL. The pipeline correctly identifies him via career history (140+ NHL games) but rates him on his current AHL workload. The "Pointman" archetype came from the offensive deployment data plus EP tags — he\'s playing a quarterback role at the AHL level.',
+      G: 'DiPietro\'s 68-game AHL workload is the strongest goalie data sample in the entire AHL pool, which is why he comes out ahead of more famous prospects. Compare his 0.55 reliability-shrunk SV% baseline against the pool — he\'s clearly the best AHL netminder this season, not just the most-talked-about.'
+    }
+  },
+  {
+    code: 'ECHL', flag: '🇺🇸', name: 'ECHL',
+    sublabel: 'East Coast Hockey League',
+    playerCount: '~570',
+    sourceCount: 'NEW',
+    summary: '<strong>New for the May 2026 release.</strong> ECHL is the bottom of the affiliated North American pyramid (NHL → AHL → ECHL). Coverage is single-source box-score data — goals, assists, shots, penalties, GP. Ratings cap appropriately for the level (ceilings around 17 in skill attributes, 16 for the top-end ECHL talents).',
+    signals: {
+      unique: [],
+      common: ['Scoring + assists', 'Shots / shooting %', 'PIM', 'GP / TOI estimates', 'Goalie SV% / GAA', 'Career history', 'EP style tags'],
+      missing: ['xG models', 'RAPM', 'On-ice splits', 'Tracking', 'Hits / Blocks / FO']
+    },
+    insights: {
+      F: 'Brandon Hawkins is the top ECHL Top 6 forward this year. The "Sniper (finesse)" archetype came from his shooting % and goal share, plus EP tags. Without on-ice or possession data, the model leans heavily on box-score finishing rates and the EP scouting layer to differentiate finishers from playmakers.',
+      D: 'Sedov as Offensive D — at the ECHL level, point-producing defensemen are by definition Offensive archetype unless something dramatic shows otherwise. The pipeline doesn\'t over-engineer ECHL D-zone work because the data isn\'t there to support that level of distinction.',
+      G: 'Dryden McKay, the former Mike Richter Award winner from Minnesota State, working through the pro pyramid. ECHL goalies cap around CA 90 in this build — the pipeline keeps appropriate distance between ECHL and AHL goalie ceilings.'
+    }
+  },
+  {
+    code: 'SPHL', flag: '🇺🇸', name: 'SPHL',
+    sublabel: 'Southern Professional Hockey League',
+    playerCount: '~230',
+    sourceCount: 'NEW',
+    summary: '<strong>New for the May 2026 release.</strong> The SPHL is below the ECHL in the North American pyramid — the lowest pro tier modeled. Coverage is basic box-score data only. Ratings appropriately reflect the level (CA cap around 85, with the Elite SPHL tier topping at 80).',
+    signals: {
+      unique: [],
+      common: ['Scoring + assists', 'PIM', 'GP', 'Goalie SV% / GAA', 'EP style tags'],
+      missing: ['Everything more advanced']
+    },
+    insights: {
+      F: 'Leif Mattson — Elite SPHL F at CA 80. The system caps SPHL skill attributes appropriately (maxing around 12-13 even for the top performers). A 0 in Acceleration on Mattson reflects the absence of any skating data at this level — the field is left empty rather than fabricated.',
+      D: 'Cory Dennis — at SPHL D, the pipeline assigns Pointman archetype based on point-production rate. With essentially no defensive data available at this level, role assignment leans toward whatever the offensive signals indicate.',
+      G: 'Nick Latinovich — SPHL goalies see appropriate ceiling compression. Even an "elite" SPHL goalie tops out at CA 75 in this build — the floor of professional hockey, not where future NHLers are typically found.'
+    }
+  },
+  {
+    code: 'SWE', flag: '🇸🇪', name: 'Sweden',
+    sublabel: 'SHL · HockeyAllsvenskan',
+    playerCount: '~735',
+    sourceCount: '1',
+    summary: '<strong>Sportality data is the European pipeline\'s richest single source.</strong> SHL provides real Corsi/Fenwick/Close-Game possession metrics, primary assist breakdowns (A1/A2), faceoff data with offensive/defensive zone splits, penalty type breakdowns (effective vs personal), and — uniquely among European leagues — game-state goal splits (trailing/tied/leading). That last one is genuinely better than what most NHL analytics provide.',
+    signals: {
+      unique: ['Game-state goals (Trail/Tied/Lead)', 'Penalty type splits (EFF/PERS)'],
+      common: ['CF% / FF% / CCF%', 'A1 / A2 split', 'FO% with zone splits', 'TOI PP/SH/EV', 'Hits / Blocks per GP'],
+      missing: ['xG models', 'RAPM', 'Tracking', 'GSAx for goalies']
+    },
+    insights: {
+      F: 'Silfverberg at SHL Elite F (CA 120) — playing at home in Sweden after his NHL career. The "All around" role came from balanced offensive and defensive signals; no single attribute dominated to push him into a specialist archetype. Career signals from his 11 NHL seasons (including 2007 Anaheim Cup run depth) feed his Determination and Pressure ratings.',
+      D: 'Kinnvall as Offensive D. Look at Passing 14 vs Wristshot 11 — the SHL data shows him as a playmaking quarterback rather than a shooter. The A1/A2 split available in Sportality is exactly what differentiates "primary playmaker" from "secondary playmaker" — a distinction NHL data rarely supports cleanly.',
+      G: 'Strauss Mann is a fascinating case — former U.S. national team and St. Cloud State netminder who chose European pro over NHL development paths. SHL Elite G at CA 120 reflects the data: he\'s the best goalie in the league this year, full stop.'
+    }
+  },
+  {
+    code: 'FIN', flag: '🇫🇮', name: 'Finland',
+    sublabel: 'Liiga · Mestis',
+    playerCount: '~740',
+    sourceCount: '1',
+    summary: '<strong>Liiga.fi has the best European goalie analytics.</strong> The Liiga provides expected goals against (xGAE), making it the only European league with an xG-style goalie quality model — comparable in concept to NHL GSAx. For skaters, Liiga also provides skating distance tracking, contest rates (physical puck battles), and pressure-passing resilience metrics. Mestis uniquely tracks <em>average skating speed per game</em>, a signal that doesn\'t exist in any other European league.',
+    signals: {
+      unique: ['xGAE (goalie xG against)', 'Contest rates (physical battles)', 'Pressure-passing resilience', 'Mestis avg skating speed'],
+      common: ['CF% (Liiga only)', 'Skating distance', 'Hits / Blocks per GP', 'TOI splits', 'Career history'],
+      missing: ['Skater xG models', 'RAPM', 'Tracking comparable to NHL EDGE']
+    },
+    insights: {
+      F: 'Aku Räty at Liiga Elite F — younger brother of NHL\'s Aatu Räty, building his own career in Finland. Winger: Playmaker reflects the A1 rate from Liiga data; the 110 CA cap is the ceiling for non-callup Liiga forwards.',
+      D: 'Vatanen at 38 still rated Liiga Elite D — career history matters here. Phase 5b career-mental modeling sees his 600+ NHL games, 2010s peak years, and active contributor signals; the model doesn\'t arbitrarily punish age. PA matches a veteran late-career profile.',
+      G: 'Heljanko is a Finnish goalie at Liiga Elite G — and this is where xGAE shines. Finland is the only European league where you can rate a goalie on something better than raw save percentage. His CA 110 reflects above-expected save performance, not just SV% in a vacuum.'
+    }
+  },
+  {
+    code: 'GER', flag: '🇩🇪', name: 'Germany',
+    sublabel: 'DEL · DEL2',
+    playerCount: '~720',
+    sourceCount: '1',
+    summary: '<strong>The only European league with NHL EDGE-equivalent tracking.</strong> Penny-del.org provides real shot velocity, puck carry speed, acceleration/deceleration measurements, forward pass ratios, and a full expected goals model. This makes the DEL the only league outside North America where skating and puck skills can be modeled from direct measurements rather than proxy stats. DEL2 uses traditional box scores.',
+    signals: {
+      unique: ['DEL puck/player tracking (NHL EDGE-equivalent)', 'Shot velocity', 'Puck carry speed', 'Acceleration/deceleration'],
+      common: ['xG model', 'CF% / FF%', 'TOI splits', 'Hits / Blocks', 'Career history'],
+      missing: ['DEL2 has none of the above — basic box score only']
+    },
+    insights: {
+      F: 'Kenny Agostino at DEL Elite F — former NHL forward in his German chapter. Look at his Acceleration 15 vs Wristshot 10. Under NHL data he might rate higher in shooting; the DEL tracking data shows his real strength is movement, not finishing. That\'s the kind of nuance only direct measurement can provide.',
+      D: 'Alex Breton hits Acceleration 17 — that\'s the DEL skating data working. Without tracking, this attribute would default to a TOI proxy; with it, we know he\'s actually one of the fastest defensemen in the league.',
+      G: 'Janne Juvonen at DEL Elite G — the DEL has an xG model that flows into the goalie analytics. CA 110 reflects above-expected save performance vs. shot quality faced, not just raw SV%.'
+    }
+  },
+  {
+    code: 'CZE', flag: '🇨🇿', name: 'Czechia',
+    sublabel: 'Extraliga (ELH) · MAXA liga',
+    playerCount: '~720',
+    sourceCount: '1',
+    summary: '<strong>Hokej.cz isolates individual defensive impact better than most.</strong> The Czech Extraliga provides scoring chance differentials relative to teammates (SCF% Rel) — a cleaner signal of individual defensive value than raw plus/minus. Direct faceoff zone splits are available for 80+ centres. Penalty shot save percentage feeds goalie ratings.',
+    signals: {
+      unique: ['SCF% Rel (relative scoring chance differential)', 'Penalty shot SV%'],
+      common: ['ZSR% (zone start %)', 'IGP% / IA1P%', 'GF% (replaces +/-)', 'FO% with zones', 'TOI splits'],
+      missing: ['xG models', 'RAPM', 'Tracking']
+    },
+    insights: {
+      F: 'Roman Cervenka — the legendary Czech veteran still going strong. Centre: Playmaker reflects the high A1 rate; career signals from his KHL years and World Championship medals carry into his Determination, Leadership, and Important Matches ratings.',
+      D: 'Jan Kostalek as Offensive (finesse) — the SCF% Rel data shows he\'s a positive driver of scoring chances above his teammates, which the model rewards more than raw point totals at his age.',
+      G: 'Skorvanek as Hybrid/Unorthodox — the Czech goalie data including penalty-shot save percentage flows into OneOnOnes; his style classification came from EP tag analysis combined with the analytics signature.'
+    }
+  },
+  {
+    code: 'SUI', flag: '🇨🇭', name: 'Switzerland',
+    sublabel: 'National League · Swiss League',
+    playerCount: '~670',
+    sourceCount: '1',
+    summary: '<strong>The closest any European league gets to NHL-grade individual impact metrics.</strong> Nlicedata.com provides relative goals-for percentage (player-isolated possession proxy), individual expected goals (ixG), and goals saved above average (GSAA) as the primary goalie signal. Swiss data provides lightweight RAPM-style player isolation that other European leagues simply don\'t have.',
+    signals: {
+      unique: ['ixG (individual xG)', 'GF% Rel (lightweight RAPM)', 'GSAA (goalie GSAx-equivalent)'],
+      common: ['CF% / FF%', 'A1 / A2 split', 'TOI splits', 'Hits / Blocks', 'Career history'],
+      missing: ['Full NHL-style RAPM decomposition', 'Tracking']
+    },
+    insights: {
+      F: 'Denis Malgin — former NHLer (Florida, Toronto, Colorado) playing as a star in Switzerland. Centre: Sniper reflects his finishing rate; the ixG model is what separates true finishers from volume shooters at the Swiss level.',
+      D: 'Erik Brännström — also former NHL (Ottawa, Vancouver). Defenceman: Offensive came directly from his GF% Rel — he\'s a positive possession driver above his teammates by a clear margin, the cleanest signal Swiss data provides.',
+      G: 'Simon Hrubec at NL Elite G — GSAA is the Swiss equivalent of NHL\'s GSAx. Hrubec rates above-expected on shot quality faced, which is what drives his CA 120, not raw SV% alone.'
+    }
+  },
+  {
+    code: 'SVK', flag: '🇸🇰', name: 'Slovakia',
+    sublabel: 'Extraliga · 1. liga',
+    playerCount: '~620',
+    sourceCount: '1',
+    summary: '<strong>The richest clutch-goal composite in any pipeline.</strong> Hockeyslovakia.sk via Hudl tracks first goals, game-winning goals, game-tying goals, and overtime goals as separate columns — that level of granularity exists nowhere else. Slovakia also provides direct hit counts, faceoff percentages, and a 5-tier penalty severity breakdown.',
+    signals: {
+      unique: ['Clutch goal composite (first/GW/tying/OT separate)', '5-tier penalty severity', 'Direct hit counts'],
+      common: ['Standard scoring + assists', 'FO%', 'Career history', 'EP style tags'],
+      missing: ['xG models', 'Possession', 'RAPM', 'Tracking']
+    },
+    insights: {
+      F: 'Patrik Marcinek — the top native Slovak forward in the Extraliga, playing for HKM Zvolen. Centre: Power forward role reflects his combination of size, physicality (Slovak hit data!), and scoring rate. The clutch-goal composite is a unique signal that helps separate "showed up in big moments" from "just productive in volume."',
+      D: 'Ryan Sproul — North American import making the data interesting. Even though he\'s Canadian, the Slovak Extraliga data flows the same way; foreign vs native nationality doesn\'t change how the model reads the signals.',
+      G: 'Jasper Patrikainen at SVK Elite G — Finnish goalie playing in Slovakia. With basic SV% data and EP style tags ("Butterfly Goalie"), the role assignment is straightforward; CA 90 is the ceiling for non-callup Slovak goalies.'
+    }
+  },
+  {
+    code: 'RUS', flag: '🇷🇺', name: 'Russia',
+    sublabel: 'KHL · VHL',
+    playerCount: '~1,560',
+    sourceCount: '1',
+    summary: '<strong>khl.ru provides signals not available in most European stat sources.</strong> TOI splits, special teams deployment, pass completion rates, puck interceptions, and takeaways. The KHL is also the highest-quality non-NHL pro league in the world — its CA ceiling tops at 130, higher than any other non-NHL pipeline.',
+    signals: {
+      unique: ['Pass completion rates', 'Puck interceptions', 'Direct takeaways'],
+      common: ['Goals/assists/scoring', 'TOI splits', 'PP/SH deployment', 'FO%', 'Hits / Blocks', 'Career history'],
+      missing: ['xG models', 'RAPM', 'Tracking', 'GSAx']
+    },
+    insights: {
+      F: 'Vitali Kravtsov as KHL Elite F (CA 129) — former Rangers first-rounder back home in Russia, where he\'s clearly thrived. Winger: Sniper (physical) reflects both his shooting volume and his hit/contact engagement — the KHL hit data is what enables the "(physical)" sub-classification.',
+      D: 'Damir Sharipzyanov — top KHL D this year, playing for Avangard Omsk (a marquee KHL franchise). Defenceman: Standard archetype came from balanced offensive/defensive signals; he\'s not a specialist, he\'s a steady all-around top-pair.',
+      G: 'Daniil Isayev — KHL Elite G. The KHL goalie data is limited to standard SV%/GAA + workload metrics, but the PA ceiling for KHL goalies (max ~135) properly reflects the league quality. Mixed style from analytics + EP tags.'
+    }
+  },
+  {
+    code: 'OHL', flag: '🇨🇦', name: 'OHL',
+    sublabel: 'Canadian Hockey League · Ontario',
+    playerCount: '~500',
+    sourceCount: 'CHL',
+    summary: '<strong>chl.ca box scores plus the OHL\'s unique dangerous-shots signal.</strong> The OHL (alongside QMJHL) tracks dangerous shots — high-quality scoring chances — which most junior leagues don\'t. Faceoff data is available league-wide. Fighting is modeled from PIM patterns. Junior stats are noisy by nature, so the pipeline leans more on the scouting overlay than box scores for prospects.',
+    signals: {
+      unique: ['Dangerous shots (high-danger scoring chances)'],
+      common: ['Goals / assists / SOG', 'Special teams production', 'GWG / first goals', 'FO%', 'Career history', 'Hand-curated CHL overlay'],
+      missing: ['xG models', 'TOI', 'On-ice metrics']
+    },
+    insights: {
+      F: 'Jack Pridham — top OHL forward this year. Winger: Sniper from the dangerous-shots signal plus shot volume. Junior modeling caps CHL F ratings at CA 100 unless an NHL ELC is signed.',
+      D: 'Kashawn Aitcheson — note the tier label: "OHL → ELC (New York Islanders)". His CA suggestion accounts for his pending Islanders entry-level deal, applying NHL prospect ceilings rather than CHL juniors. Defenceman: Pointman (physical) came from scouting overlay tags + statistical profile.',
+      G: 'Ryder Fetterolf at CHL Starter 1A — the OHL\'s top netminder this year. Junior goalie modeling is heavily PA-driven because raw SV% with limited shot-quality context produces noisy ratings.'
+    }
+  },
+  {
+    code: 'WHL', flag: '🇨🇦', name: 'WHL',
+    sublabel: 'Canadian Hockey League · Western',
+    playerCount: '~575',
+    sourceCount: 'CHL',
+    summary: '<strong>WHL data structure mirrors OHL minus the dangerous-shots signal.</strong> Standard chl.ca box scores including special teams production, shootout stats, game-winning goals, first goals, and overtime goals. Faceoff data is available. The WHL allows fighting (unlike QMJHL).',
+    signals: {
+      unique: [],
+      common: ['Goals / assists / SOG', 'Special teams', 'GWG / first / OT goals', 'FO%', 'Fighting (PIM-derived)', 'Career history'],
+      missing: ['Dangerous shots', 'xG', 'TOI', 'On-ice metrics']
+    },
+    insights: {
+      F: 'Alex Weiermair — note the tier "WHL → ELC (Vegas Golden Knights)". His CA 100 reflects the Vegas ELC ceiling; without that contract, he\'d be modeled in a CHL Elite F band rather than a near-NHL band.',
+      D: 'Bryce Pickford as Pointman — the WHL data and scouting overlay both pointed to a power-play quarterback profile. Junior D modeling depends heavily on the overlay because point-production at the WHL level can mask real two-way ability either direction.',
+      G: 'Joshua Ravensbergen at CHL Starter 1A — top WHL goalie. Mixed style from overlay scouting tags. The WHL goalie ceiling matches OHL/QMJHL — all CHL goalies cap at CA 100 without NHL signing.'
+    }
+  },
+  {
+    code: 'QMJHL', flag: '🇨🇦', name: 'QMJHL',
+    sublabel: 'Canadian Hockey League · Quebec',
+    playerCount: '~470',
+    sourceCount: 'CHL',
+    summary: '<strong>QMJHL has dangerous shots (like OHL) but no fighting.</strong> The Q\'s 2020 fighting ban means fighting attribute is zeroed for QMJHL players — no PIM-pattern inference attempted. Standard chl.ca box scores otherwise.',
+    signals: {
+      unique: ['Dangerous shots'],
+      common: ['Goals / assists / SOG', 'Special teams', 'GWG / first / OT goals', 'FO%', 'Career history'],
+      missing: ['Fighting (zeroed by league rule)', 'xG', 'TOI', 'On-ice metrics']
+    },
+    insights: {
+      F: 'Vincent Desjardins at Centre: Playmaker (finesse) — the Q\'s top forward this year. The "(finesse)" sub-classification came from style tags and offensive profile; without fighting/physicality signal, the model defaults toward finesse archetypes for skill forwards.',
+      D: 'Jordan Tourigny as Offensive (finesse) — clean signal from the Q box scores plus EP style tags. CHL Elite D ceiling.',
+      G: 'Rudy Guimond at CHL Starter 1A — top QMJHL netminder. With QMJHL\'s relative isolation, EP scouting tags carry significant weight in the goalie style classification.'
+    }
+  },
+  {
+    code: 'NCAA', flag: '🇺🇸', name: 'NCAA',
+    sublabel: 'NCAA Division I',
+    playerCount: '~1,500',
+    sourceCount: '1',
+    summary: '<strong>NCAA uniquely provides time-on-ice and blocked shots.</strong> College Hockey News data covers all 63 D-I programs, with conference strength weighting (Big Ten/Hockey East/NCHC carry full weight, smaller conferences scaled down). A 50-player hand-scouted overlay from EP\'s NCAA Free Agency Guide provides 9-category nudges for top college free agents.',
+    signals: {
+      unique: ['NCAA TOI data', 'Blocked shots'],
+      common: ['Goals / assists / SOG', 'PIM', 'GWG / first goals', 'Conference-weighted', 'EP style tags', 'Hand-curated overlay'],
+      missing: ['xG models', 'On-ice metrics', 'RAPM', 'Tracking']
+    },
+    insights: {
+      F: 'Max Plante — top NCAA forward this year. Winger: Playmaker came from the assist rate signal; the conference-weighted scoring properly differentiates Big Ten production from smaller-conference inflation.',
+      D: 'Eric Pohlkamp — note the tier "NCAA → ELC (San Jose Sharks)". His CA reflects pending NHL contract status. Defenceman: Pointman (physical) came from scouting overlay; his EP profile flagged him as a heavy-shooting offensive D.',
+      G: 'Michael Hrabal — Utah Mammoth\'s prospect, large 6\'7" Czech goalie at UMass. The "(Utah Mammoth)" tier reflects his ELC signing; absent that, he\'d be modeled in CHL Starter 1A like the other top NCAA goalies.'
+    }
+  },
+  {
+    code: 'USHL', flag: '🇺🇸', name: 'USHL',
+    sublabel: 'United States Hockey League',
+    playerCount: '~445',
+    sourceCount: '1',
+    summary: '<strong>USHL has the cleanest finishing signal of any junior league.</strong> HockeyTech API tracks empty-net goals and unassisted goals separately from regular goals, providing cleaner shooting percentages and individual finishing signals. Game-winning goals, first goals, insurance goals, and overtime goals all tracked separately. NTDP players are modeled identically to the rest of the USHL pool.',
+    signals: {
+      unique: ['Empty-net goals', 'Unassisted goals', 'Insurance goals'],
+      common: ['Goals / assists / SOG', 'Special teams', 'GWG / first / OT goals', 'NTDP integration', 'EP style tags'],
+      missing: ['xG models', 'On-ice metrics', 'TOI', 'Tracking']
+    },
+    insights: {
+      F: 'Nicky Romeo as Winger: Sniper (finesse) — the USHL\'s clean shooting % (with empty-netters and unassisted goals filtered correctly) supports proper finisher identification. CHL Elite F ceiling at CA 100.',
+      D: 'Bode Laylin as Offensive D — clean USHL signal. The ".88 IGP%" type signal (when available) tells the model whether a defenseman is involved in goals at primary or secondary level.',
+      G: 'Tobias Trejbal — Czech goalie playing in the USHL. With international career history flowing through Phase 5b/7b, his Adaptability rating reflects geographic diversity (Czech junior → USHL pathway).'
+    }
+  },
+  {
+    code: 'NAHL', flag: '🇺🇸', name: 'NAHL',
+    sublabel: 'North American Hockey League',
+    playerCount: '~770',
+    sourceCount: '1',
+    summary: '<strong>The lowest junior tier modeled.</strong> GameSheet API provides standard box-score coverage. CA tier appropriately reflects the developmental nature of the league — top NAHL prospects are ELC candidates, but the league as a whole is below USHL for prospect density.',
+    signals: {
+      unique: [],
+      common: ['Goals / assists / SOG', 'PIM', 'GP', 'Special teams', 'Career history', 'EP style tags'],
+      missing: ['xG models', 'On-ice metrics', 'TOI', 'Tracking', 'Most advanced signals']
+    },
+    insights: {
+      F: 'Oliver Barna at NAHL Elite F (CA 78). Note: there\'s a known cross-link issue with another NAHL player named "Matthew Wood" who got cross-matched to the NHL\'s Matthew Wood (Nashville). Barna is the cleanest top-true-NAHL forward this season. Winger: All around archetype reflects balanced production.',
+      D: 'Noah Ziskie — NAHL First-Pair D. Without on-ice or possession data, NAHL D ratings rely entirely on box-score production and EP scouting tags.',
+      G: 'Jack Solomon at NAHL Elite G — with EP tags pointing to Hybrid/Unorthodox style, the role classification follows directly. NAHL goalie ratings cap appropriately for the league level.'
+    }
+  }
+];
+
+// ═══ RENDER ═══
+function attrClass(val) {
+  if (val >= 18) return 'elite';
+  if (val >= 15) return 'high';
+  if (val <= 7) return 'low';
+  return '';
+}
+
+function attrColor(val) {
+  if (val >= 18) return 'var(--accent-amber)';
+  if (val >= 15) return 'var(--accent-emerald)';
+  if (val >= 12) return 'var(--accent-blue)';
+  if (val >= 9) return 'var(--accent-cyan)';
+  if (val <= 7) return 'var(--text-muted)';
+  return 'var(--accent-blue)';
+}
+
+function renderAttrs(attrs) {
+  if (!attrs || Object.keys(attrs).length === 0) return '';
+  return Object.entries(attrs).map(([name, val]) => {
+    const pct = (val / 20) * 100;
+    return `
+      <div class="attr-row">
+        <span class="attr-name">${name}</span>
+        <div class="attr-bar"><div class="attr-bar-fill" style="width:${pct}%;background:${attrColor(val)}"></div></div>
+        <span class="attr-val ${attrClass(val)}">${val}</span>
+      </div>`;
+  }).join('');
+}
+
+function renderPlayer(pos, p) {
+  if (!p) return '';
+  const posLabel = pos === 'F' ? 'Forward' : pos === 'D' ? 'Defense' : 'Goalie';
+  const caClass = p.CA >= 180 ? 'high' : '';
+  return `
+    <div class="player-card ${pos}">
+      <span class="pos-badge ${pos}">${posLabel}</span>
+      <div class="player-name">${p.name}</div>
+      <div class="player-meta">
+        ${p.club ? `<span class="player-meta-item">${p.club}</span>` : ''}
+        ${p.nat && p.nat !== 'nan' ? `<span class="player-meta-item">${p.nat}</span>` : ''}
+        ${p.gp ? `<span class="player-meta-item">${p.gp} GP</span>` : ''}
+      </div>
+      <div class="player-tier">${p.tier}</div>
+      <div class="player-role">${p.role}</div>
+      <div class="ca-pa-row">
+        <div class="ca-pa-cell">
+          <div class="ca-pa-label">Suggested CA</div>
+          <div class="ca-pa-val ${caClass}">${p.CA || '—'}</div>
+        </div>
+        <div class="ca-pa-cell">
+          <div class="ca-pa-label">PA</div>
+          <div class="ca-pa-val">${p.PA || '—'}</div>
+        </div>
+      </div>
+      <div class="attrs-grid">
+        ${renderAttrs(p.attrs)}
+      </div>
+    </div>`;
+}
+
+function renderLeague(league) {
+  const profiles = PROFILES[league.code] || {};
+  const sigsHtml = `
+    <div class="signal-row">
+      ${league.signals.unique.map(s => `<span class="signal-tag unique">★ ${s}</span>`).join('')}
+      ${league.signals.common.map(s => `<span class="signal-tag">${s}</span>`).join('')}
+      ${league.signals.missing.map(s => `<span class="signal-tag absent">no ${s}</span>`).join('')}
+    </div>
+  `;
+
+  let playersHtml = '';
+  for (const pos of ['F', 'D', 'G']) {
+    if (profiles[pos]) {
+      playersHtml += renderPlayer(pos, profiles[pos]);
+    }
+  }
+
+  let insightsHtml = '';
+  for (const pos of ['F', 'D', 'G']) {
+    if (league.insights[pos] && profiles[pos]) {
+      const posLabel = pos === 'F' ? 'Forward' : pos === 'D' ? 'Defense' : 'Goalie';
+      insightsHtml += `
+        <div class="insight-box">
+          <div class="insight-label">What the data says · ${posLabel}: ${profiles[pos].name}</div>
+          ${league.insights[pos]}
+        </div>`;
+    }
+  }
+
+  return `
+    <section class="league-section" id="${league.code}">
+      <div class="league-header">
+        <span class="league-flag">${league.flag}</span>
+        <div class="league-title-block">
+          <div class="league-name">${league.name}</div>
+          <div class="league-leagues">${league.sublabel}</div>
+        </div>
+        <div class="league-stats">
+          <div class="league-stat">
+            <div class="league-stat-val">${league.playerCount}</div>
+            <div class="league-stat-label">Players</div>
+          </div>
+          <div class="league-stat">
+            <div class="league-stat-val">${league.sourceCount}</div>
+            <div class="league-stat-label">Source${league.sourceCount === '1' ? '' : 's'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="league-summary">${league.summary}</div>
+      ${sigsHtml}
+      <div class="players-grid">${playersHtml}</div>
+      ${insightsHtml}
+    </section>`;
+}
+
+// Render all leagues
+document.getElementById('main').innerHTML = LEAGUES.map(renderLeague).join('');
+
+// Sidebar active state on scroll
+const links = document.querySelectorAll('.sidebar-link');
+const sections = LEAGUES.map(l => document.getElementById(l.code));
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.sidebar-link[href="#${entry.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-100px 0px -60% 0px' });
+sections.forEach(s => s && observer.observe(s));
+</script>
+
+</body>
+</html>

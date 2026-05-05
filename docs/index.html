@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pivot Pipeline — Documentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg-deep: #0a0e17;
+    --bg-surface: #111827;
+    --bg-card: #1a2236;
+    --bg-elevated: #1f2a42;
+    --border: #2a3654;
+    --text-primary: #e8ecf4;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --gradient-hero: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1a1033 100%);
+    --gradient-accent: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --font-display: 'Outfit', system-ui, sans-serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,23,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 2rem; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 1.05rem; color: var(--text-primary);
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .nav-brand .logo {
+    width: 32px; height: 32px;
+    background: var(--gradient-accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.9rem; color: white;
+  }
+  .nav-links {
+    display: flex; gap: 0.25rem; list-style: none;
+  }
+  .nav-links a {
+    font-family: var(--font-display);
+    font-size: 0.85rem; font-weight: 500;
+    color: var(--text-muted);
+    padding: 0.4rem 0.85rem; border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover {
+    color: var(--text-primary); background: var(--bg-card);
+    text-decoration: none;
+  }
+  .nav-github {
+    background: var(--bg-card);
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border);
+  }
+
+  .hero {
+    background: var(--gradient-hero);
+    padding: 6rem 2rem 5rem;
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 40%, rgba(59,130,246,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 30%, rgba(6,182,212,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(139,92,246,0.06) 0%, transparent 50%);
+  }
+  .hero::after {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-inner {
+    max-width: 1200px; margin: 0 auto;
+    position: relative; z-index: 1;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem; color: var(--accent-cyan);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 40px; height: 2px;
+    background: var(--gradient-accent);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+    font-weight: 800; line-height: 1.05;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #e8ecf4 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+  }
+  .hero-subtitle {
+    font-size: 1.2rem; line-height: 1.65;
+    color: var(--text-secondary);
+    max-width: 680px; margin-bottom: 2.5rem;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5rem; max-width: 800px;
+    margin-bottom: 2.5rem;
+  }
+  .hero-stat-value {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 700;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+  .hero-stat-label {
+    font-family: var(--font-display);
+    font-size: 0.72rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-top: 0.4rem;
+  }
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--gradient-accent);
+    color: white !important;
+    padding: 0.85rem 1.5rem; border-radius: 8px;
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 0.95rem;
+    transition: all 0.2s; text-decoration: none !important;
+    box-shadow: 0 4px 24px rgba(59,130,246,0.25);
+  }
+  .hero-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 32px rgba(59,130,246,0.4);
+  }
+  .hero-cta-secondary {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--bg-card);
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border);
+    padding: 0.85rem 1.5rem; border-radius: 8px;
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 0.95rem;
+    margin-left: 0.75rem;
+    text-decoration: none !important;
+    transition: all 0.2s;
+  }
+  .hero-cta-secondary:hover {
+    border-color: var(--accent-blue);
+  }
+
+  .content {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 2rem;
+  }
+  section {
+    padding: 5rem 0;
+    border-bottom: 1px solid rgba(42,54,84,0.5);
+  }
+  section:last-of-type { border-bottom: none; }
+
+  .section-label {
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--accent-cyan); letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-label::before {
+    content: ''; width: 24px; height: 2px;
+    background: var(--accent-cyan);
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: 2.25rem; font-weight: 700;
+    margin-bottom: 1.5rem; line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: var(--font-display);
+    font-size: 1.3rem; font-weight: 600;
+    margin: 1.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1rem; color: var(--text-secondary); }
+  strong { color: var(--text-primary); font-weight: 600; }
+
+  /* Doc cards */
+  .doc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem; margin-top: 2.5rem;
+  }
+  .doc-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem; text-decoration: none;
+    color: inherit; transition: all 0.25s;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+  .doc-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: var(--gradient-accent);
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .doc-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    text-decoration: none;
+  }
+  .doc-card:hover::before { opacity: 1; }
+  .doc-card-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 1rem;
+    flex-shrink: 0;
+  }
+  .doc-card-icon.blue { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .doc-card-icon.cyan { background: rgba(6,182,212,0.15); color: var(--accent-cyan); }
+  .doc-card-icon.emerald { background: rgba(16,185,129,0.15); color: var(--accent-emerald); }
+  .doc-card-icon.amber { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+  .doc-card-icon.purple { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+  .doc-card-icon.pink { background: rgba(236,72,153,0.15); color: var(--accent-pink); }
+  .doc-card-title {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1.15rem;
+    color: var(--text-primary); margin-bottom: 0.5rem;
+  }
+  .doc-card-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem; line-height: 1.6;
+    flex: 1; margin-bottom: 1rem;
+  }
+  .doc-card-arrow {
+    font-family: var(--font-display);
+    font-size: 0.85rem; font-weight: 600;
+    color: var(--accent-blue);
+    margin-top: auto;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .doc-card-status {
+    position: absolute; top: 1.25rem; right: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px;
+    background: rgba(16,185,129,0.12);
+    color: var(--accent-emerald);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .doc-card-status.coming {
+    background: rgba(245,158,11,0.12);
+    color: var(--accent-amber);
+  }
+
+  /* League grid */
+  .league-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem; margin-top: 2rem;
+  }
+  .league-tile {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    transition: all 0.2s;
+  }
+  .league-tile:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-1px);
+  }
+  .league-tile-flag {
+    font-size: 1.4rem; margin-bottom: 0.4rem;
+  }
+  .league-tile-name {
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 0.85rem;
+    color: var(--text-primary);
+  }
+  .league-tile-leagues {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* Release timeline */
+  .release-list {
+    margin-top: 2rem;
+    border-left: 2px solid var(--border);
+    padding-left: 1.5rem;
+  }
+  .release-item {
+    margin-bottom: 1.5rem; position: relative;
+  }
+  .release-item::before {
+    content: ''; position: absolute;
+    left: -1.85rem; top: 0.4rem;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--bg-deep);
+    border: 2px solid var(--accent-blue);
+  }
+  .release-item.current::before {
+    background: var(--accent-emerald);
+    border-color: var(--accent-emerald);
+    box-shadow: 0 0 0 4px rgba(16,185,129,0.15);
+  }
+  .release-date {
+    font-family: var(--font-mono);
+    font-size: 0.75rem; color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .release-title {
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 1rem;
+    margin: 0.2rem 0;
+  }
+  .release-summary {
+    color: var(--text-secondary); font-size: 0.9rem;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem 2rem;
+    color: var(--text-muted); font-size: 0.85rem;
+    text-align: center;
+  }
+  footer a { color: var(--text-secondary); }
+
+  @media (max-width: 768px) {
+    .nav-links a:not(.nav-github) { display: none; }
+    .hero { padding: 4rem 1.5rem 3rem; }
+    .content { padding: 0 1.5rem; }
+    section { padding: 3rem 0; }
+    .hero-cta-secondary { margin-left: 0; margin-top: 0.75rem; display: inline-flex; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="./" class="nav-brand">
+      <div class="logo">P</div>
+      <span>Pivot Pipeline</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#docs">Docs</a></li>
+      <li><a href="#leagues">Leagues</a></li>
+      <li><a href="#releases">Releases</a></li>
+      <li><a href="https://github.com/xECK29x/pivot-pipeline" class="nav-github">GitHub →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Documentation Home</div>
+    <h1>Player ratings,<br>analytically grounded.</h1>
+    <p class="hero-subtitle">
+      The Pivot Pipeline transforms 60+ real-world hockey data sources into Eastside Hockey Manager player ratings across 17 league pipelines. Every rating is auditable, defensible, and built on the data each league actually tracks.
+    </p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-value">14,500+</div>
+        <div class="hero-stat-label">Players Rated</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">17</div>
+        <div class="hero-stat-label">League Pipelines</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">630+</div>
+        <div class="hero-stat-label">Scouted Prospects</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">~28k</div>
+        <div class="hero-stat-label">Lines of Code</div>
+      </div>
+    </div>
+    <div>
+      <a href="pipeline-guide.html" class="hero-cta">
+        Read the Pipeline Guide →
+      </a>
+      <a href="data-sources.html" class="hero-cta-secondary">
+        Explore Data Sources
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+
+<section id="docs">
+  <div class="section-label">Documentation</div>
+  <h2>Where to start</h2>
+  <p>Choose the entry point that matches what you're trying to learn.</p>
+
+  <div class="doc-grid">
+    <a href="pipeline-guide.html" class="doc-card">
+      <div class="doc-card-status">Live</div>
+      <div class="doc-card-icon blue">📖</div>
+      <div class="doc-card-title">The Pipeline Guide</div>
+      <div class="doc-card-desc">A comprehensive visual walkthrough of how raw hockey data becomes player ratings. Written for hockey fans first, technical readers second. Covers every modeling phase, the data sources, the CA tier system, and the role suggestion engine.</div>
+      <div class="doc-card-arrow">Open the guide →</div>
+    </a>
+
+    <a href="data-sources.html" class="doc-card">
+      <div class="doc-card-status">Live</div>
+      <div class="doc-card-icon cyan">🌍</div>
+      <div class="doc-card-title">Data Sources by League</div>
+      <div class="doc-card-desc">What data does each of the 17 league pipelines actually use? With three example players per league (top forward, defenseman, and goalie), this is the deep dive into what makes each league's ratings tick.</div>
+      <div class="doc-card-arrow">Browse leagues →</div>
+    </a>
+
+    <a href="pipeline-flow.html" class="doc-card">
+      <div class="doc-card-status">Live</div>
+      <div class="doc-card-icon emerald">⚙️</div>
+      <div class="doc-card-title">Pipeline Flow</div>
+      <div class="doc-card-desc">The architecture diagram. From raw scraping through master file build, modeling phases, scouting overlay, cross-pipeline reconciliation, final merge, and into the playable EHM database.</div>
+      <div class="doc-card-arrow">View the flow →</div>
+    </a>
+
+    <a href="https://github.com/xECK29x/pivot-pipeline/tree/main/specs" class="doc-card">
+      <div class="doc-card-status">Live</div>
+      <div class="doc-card-icon amber">📐</div>
+      <div class="doc-card-title">Design Specs</div>
+      <div class="doc-card-desc">The technical reference docs for the research team. NHL pipeline gold standard, AHL/European tier-2 adaptations, gap-filling techniques for thin-data leagues, and the porting checklist for new league additions.</div>
+      <div class="doc-card-arrow">Browse specs →</div>
+    </a>
+
+    <a href="#" class="doc-card" style="opacity: 0.5; cursor: not-allowed;" onclick="event.preventDefault();">
+      <div class="doc-card-status coming">Soon</div>
+      <div class="doc-card-icon purple">📊</div>
+      <div class="doc-card-title">Interactive Dashboards</div>
+      <div class="doc-card-desc">Per-team depth charts, attribute distribution viewers, draft class browsers, and prospect overlay audits. The QA tooling we use internally, opened up for the community.</div>
+      <div class="doc-card-arrow">Coming next release</div>
+    </a>
+
+    <a href="#" class="doc-card" style="opacity: 0.5; cursor: not-allowed;" onclick="event.preventDefault();">
+      <div class="doc-card-status coming">Soon</div>
+      <div class="doc-card-icon pink">🎯</div>
+      <div class="doc-card-title">Player Profile Lookup</div>
+      <div class="doc-card-desc">Type a player name, see exactly what data drove their rating — the input signals, the modeled attributes, the role decision, the scouting overlay nudges, the CA suggestion math. Full transparency.</div>
+      <div class="doc-card-arrow">Coming next release</div>
+    </a>
+  </div>
+</section>
+
+<section id="leagues">
+  <div class="section-label">Coverage</div>
+  <h2>17 league pipelines, one rating scale</h2>
+  <p>Every league below is rated on the same absolute Current Ability scale. An SHL first-liner at CA 110 sits exactly where you'd expect relative to an AHL top-six forward or NHL bottom-six player.</p>
+
+  <div class="league-grid">
+    <a href="data-sources.html#NHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇨🇦🇺🇸</div>
+      <div class="league-tile-name">NHL</div>
+      <div class="league-tile-leagues">~880 players</div>
+    </a>
+    <a href="data-sources.html#AHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇨🇦🇺🇸</div>
+      <div class="league-tile-name">AHL</div>
+      <div class="league-tile-leagues">~2,000 players</div>
+    </a>
+    <a href="data-sources.html#ECHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇺🇸</div>
+      <div class="league-tile-name">ECHL</div>
+      <div class="league-tile-leagues">~570 players · NEW</div>
+    </a>
+    <a href="data-sources.html#SPHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇺🇸</div>
+      <div class="league-tile-name">SPHL</div>
+      <div class="league-tile-leagues">~230 players · NEW</div>
+    </a>
+    <a href="data-sources.html#SWE" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇸🇪</div>
+      <div class="league-tile-name">Sweden</div>
+      <div class="league-tile-leagues">SHL · HA</div>
+    </a>
+    <a href="data-sources.html#FIN" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇫🇮</div>
+      <div class="league-tile-name">Finland</div>
+      <div class="league-tile-leagues">Liiga · Mestis</div>
+    </a>
+    <a href="data-sources.html#GER" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇩🇪</div>
+      <div class="league-tile-name">Germany</div>
+      <div class="league-tile-leagues">DEL · DEL2</div>
+    </a>
+    <a href="data-sources.html#CZE" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇨🇿</div>
+      <div class="league-tile-name">Czechia</div>
+      <div class="league-tile-leagues">Extraliga · MAXA</div>
+    </a>
+    <a href="data-sources.html#SUI" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇨🇭</div>
+      <div class="league-tile-name">Switzerland</div>
+      <div class="league-tile-leagues">NL · SL</div>
+    </a>
+    <a href="data-sources.html#SVK" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇸🇰</div>
+      <div class="league-tile-name">Slovakia</div>
+      <div class="league-tile-leagues">Extraliga · 1. liga</div>
+    </a>
+    <a href="data-sources.html#RUS" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇷🇺</div>
+      <div class="league-tile-name">Russia</div>
+      <div class="league-tile-leagues">KHL · VHL</div>
+    </a>
+    <a href="data-sources.html#OHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇨🇦</div>
+      <div class="league-tile-name">OHL</div>
+      <div class="league-tile-leagues">CHL · ~500 players</div>
+    </a>
+    <a href="data-sources.html#WHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇨🇦</div>
+      <div class="league-tile-name">WHL</div>
+      <div class="league-tile-leagues">CHL · ~575 players</div>
+    </a>
+    <a href="data-sources.html#QMJHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇨🇦</div>
+      <div class="league-tile-name">QMJHL</div>
+      <div class="league-tile-leagues">CHL · ~470 players</div>
+    </a>
+    <a href="data-sources.html#NCAA" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇺🇸</div>
+      <div class="league-tile-name">NCAA</div>
+      <div class="league-tile-leagues">D-I · ~1,500 players</div>
+    </a>
+    <a href="data-sources.html#USHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇺🇸</div>
+      <div class="league-tile-name">USHL</div>
+      <div class="league-tile-leagues">~445 players</div>
+    </a>
+    <a href="data-sources.html#NAHL" class="league-tile" style="text-decoration:none">
+      <div class="league-tile-flag">🇺🇸</div>
+      <div class="league-tile-name">NAHL</div>
+      <div class="league-tile-leagues">~770 players</div>
+    </a>
+  </div>
+</section>
+
+<section id="releases">
+  <div class="section-label">Release Timeline</div>
+  <h2>What's shipped</h2>
+  <p>The pipeline ships alongside each Premier Pivot Rosters / TBL Database update. Each release builds on the last.</p>
+
+  <div class="release-list">
+    <div class="release-item current">
+      <div class="release-date">May 2026 · vNext+</div>
+      <div class="release-title">Multi-league expansion + cross-pipeline reconciliation</div>
+      <div class="release-summary">12 European leagues, ECHL/SPHL added, junior pipeline overhaul, 630+ scouted prospects, multi-league season handling for callup/loan players, future draft class cleanup through 2100.</div>
+    </div>
+    <div class="release-item">
+      <div class="release-date">March 2026 · vNext</div>
+      <div class="release-title">NHL/AHL pipeline rebuild</div>
+      <div class="release-summary">Complete overhaul of the NHL/AHL ratings — z-score distributions replacing percentile-rank, Bayesian shrinkage for shooting attributes, EDGE tracking integration, career-informed mental attributes, CA & role suggestion engine, NHL/AHL quality-preferred merge.</div>
+    </div>
+    <div class="release-item">
+      <div class="release-date">Earlier 2026</div>
+      <div class="release-title">Original NHL/AHL re-rates pipeline</div>
+      <div class="release-summary">Initial public release of the analytics-driven re-rates approach, with Natural Stat Trick + MoneyPuck data foundation.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-label">About</div>
+  <h2>Honest about how this is built</h2>
+  <p>This project uses substantial AI assistance — originally ChatGPT, currently Claude (Anthropic). The AI does the implementation work for the modeling, scripting, and documentation. The human (xECK29x) provides hockey expertise, oversight, validation, and direction throughout.</p>
+
+  <p>That setup matters for two reasons. First, the AI is a powerful tool but it requires deep domain knowledge to guide — without hockey instincts informing every decision, you get reasonable-looking nonsense. Second, transparency is part of the contract with the community: the methodology is auditable precisely because the documentation exists.</p>
+
+  <p>This repo is the public face of that transparency. The code lives in a private repo (selectively shared with research collaborators) because it includes API integrations and scraping tools that aren't appropriate to publish openly. But every methodology decision, every formula, every weight is documented here — and that's where you can challenge it, propose changes, or just understand what's happening under the hood.</p>
+
+  <h3>Got feedback?</h3>
+  <p>The whole reason this repo exists is auditability. If you think a rating is wrong, a formula is off, or a methodology choice deserves debate — file a GitHub issue, post on the EHM forums, drop a thread on r/EHM. That's all in scope.</p>
+</section>
+
+</div>
+
+<footer>
+  <p>
+    <strong>Pivot Pipeline</strong> — Documentation Home<br>
+    Maintained by <a href="https://github.com/xECK29x">xECK29x</a> · Modeling assistance by Claude (Anthropic)<br>
+    Published under <a href="https://github.com/xECK29x/pivot-pipeline/blob/main/LICENSE">MIT License</a> · <a href="https://github.com/xECK29x/pivot-pipeline">View on GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

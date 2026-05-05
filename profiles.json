@@ -1,0 +1,1192 @@
+{
+  "NHL": {
+    "F": {
+      "name": "Connor McDavid",
+      "club": "EDM",
+      "CA": 195,
+      "PA": 200,
+      "tier": "Medium NHL Franchise F",
+      "role": "Centre: Playmaker (finesse)",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 18,
+        "Slapshot": 19,
+        "Passing": 20,
+        "Stickhandling": 20,
+        "Acceleration": 20,
+        "Pace": 20,
+        "Hitting": 8,
+        "Positioning": 8,
+        "Anticipation": 20,
+        "Decisions": 19,
+        "Creativity": 20,
+        "WorkRate": 20
+      },
+      "gp": 81
+    },
+    "D": {
+      "name": "Zach Werenski",
+      "club": "CBJ",
+      "CA": 199,
+      "PA": 194,
+      "tier": "Medium NHL Franchise D",
+      "role": "Defenceman: Offensive (finesse)",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 18,
+        "Slapshot": 19,
+        "Passing": 19,
+        "Stickhandling": 19,
+        "Acceleration": 19,
+        "Pace": 19,
+        "Hitting": 9,
+        "Positioning": 15,
+        "Anticipation": 20,
+        "Decisions": 20,
+        "Creativity": 19,
+        "WorkRate": 20
+      },
+      "gp": 75
+    },
+    "G": {
+      "name": "Logan Thompson",
+      "club": "WSH",
+      "CA": 200,
+      "PA": 194,
+      "tier": "High NHL Franchise",
+      "role": "Goalie: Mixed",
+      "nat": "Canada",
+      "attrs": {
+        "Reflexes": 19,
+        "Positioning": 19,
+        "Glove": 19,
+        "Blocker": 19,
+        "Recovery": 14,
+        "Rebounds": 11,
+        "OneOnOnes": 19,
+        "Agility": 19
+      },
+      "gp": 58
+    }
+  },
+  "AHL": {
+    "F": {
+      "name": "Easton Cowan",
+      "club": "Toronto Maple Leafs",
+      "CA": 119,
+      "PA": -9,
+      "tier": "High AHL Top 6 F",
+      "role": "Winger: All around",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 11,
+        "Slapshot": 11,
+        "Passing": 13,
+        "Stickhandling": 13,
+        "Acceleration": 12,
+        "Pace": 13,
+        "Hitting": 10,
+        "Positioning": 11,
+        "Anticipation": 15,
+        "Decisions": 13,
+        "Creativity": 0,
+        "WorkRate": 15
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Ethan Bear",
+      "club": "New York Islanders",
+      "CA": 119,
+      "PA": 123,
+      "tier": "High AHL Top Pair D",
+      "role": "Defenceman: Pointman",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 9,
+        "Slapshot": 11,
+        "Passing": 11,
+        "Stickhandling": 10,
+        "Acceleration": 9,
+        "Pace": 10,
+        "Hitting": 6,
+        "Positioning": 9,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 0,
+        "WorkRate": 12
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Michael DiPietro",
+      "club": "Boston Bruins",
+      "CA": 135,
+      "PA": -8,
+      "tier": "Medium NHL Backup 2B G",
+      "role": "Goalie: Butterfly",
+      "nat": "Canada",
+      "attrs": {
+        "Reflexes": 15,
+        "Positioning": 16,
+        "Glove": 15,
+        "Blocker": 14,
+        "Recovery": 15,
+        "Rebounds": 15,
+        "OneOnOnes": 16,
+        "Agility": 16
+      },
+      "gp": null
+    }
+  },
+  "SWE": {
+    "F": {
+      "name": "Jakob Silfverberg",
+      "club": "Brynäs IF",
+      "CA": 120,
+      "PA": 120,
+      "tier": "SHL Elite F",
+      "role": "Winger: All around",
+      "nat": "Sweden",
+      "attrs": {
+        "Wristshot": 11,
+        "Slapshot": 10,
+        "Passing": 11,
+        "Stickhandling": 11,
+        "Acceleration": 11,
+        "Pace": 11,
+        "Hitting": 9,
+        "Positioning": 12,
+        "Anticipation": 18,
+        "Decisions": 0,
+        "Creativity": 11,
+        "WorkRate": 10
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Johannes Kinnvall",
+      "club": "Brynäs IF",
+      "CA": 120,
+      "PA": 124,
+      "tier": "SHL Elite D",
+      "role": "Defenceman: Offensive",
+      "nat": "Sweden",
+      "attrs": {
+        "Wristshot": 11,
+        "Slapshot": 11,
+        "Passing": 14,
+        "Stickhandling": 12,
+        "Acceleration": 11,
+        "Pace": 11,
+        "Hitting": 9,
+        "Positioning": 11,
+        "Anticipation": 18,
+        "Decisions": 0,
+        "Creativity": 12,
+        "WorkRate": 10
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Strauss Mann",
+      "club": "Skellefteå AIK",
+      "CA": 120,
+      "PA": 126,
+      "tier": "SHL Elite G",
+      "role": "Goalie: Butterfly",
+      "nat": "United States",
+      "attrs": {
+        "Reflexes": 14,
+        "Positioning": 13,
+        "Glove": 12,
+        "Blocker": 13,
+        "Recovery": 13,
+        "Rebounds": 11,
+        "OneOnOnes": 14,
+        "Agility": 14
+      },
+      "gp": null
+    }
+  },
+  "FIN": {
+    "F": {
+      "name": "Aku Räty",
+      "club": "Oulun Kärpät",
+      "CA": 110,
+      "PA": 124,
+      "tier": "LIIGA Elite F",
+      "role": "Winger: Playmaker",
+      "nat": "Finland",
+      "attrs": {
+        "Wristshot": 11,
+        "Slapshot": 10,
+        "Passing": 12,
+        "Stickhandling": 11,
+        "Acceleration": 11,
+        "Pace": 11,
+        "Hitting": 6,
+        "Positioning": 10,
+        "Anticipation": 18,
+        "Decisions": 0,
+        "Creativity": 11,
+        "WorkRate": 16
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Sami Vatanen",
+      "club": "Jyväskylän JYP",
+      "CA": 109,
+      "PA": 109,
+      "tier": "LIIGA Elite D",
+      "role": "Defenceman: Offensive",
+      "nat": "Finland",
+      "attrs": {
+        "Wristshot": 10,
+        "Slapshot": 11,
+        "Passing": 13,
+        "Stickhandling": 11,
+        "Acceleration": 13,
+        "Pace": 13,
+        "Hitting": 8,
+        "Positioning": 9,
+        "Anticipation": 15,
+        "Decisions": 0,
+        "Creativity": 10,
+        "WorkRate": 14
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Christian Heljanko",
+      "club": "Tampereen Tappara",
+      "CA": 110,
+      "PA": 114,
+      "tier": "LIIGA Elite G",
+      "role": "Goalie: Butterfly",
+      "nat": "Finland",
+      "attrs": {
+        "Reflexes": 13,
+        "Positioning": 13,
+        "Glove": 12,
+        "Blocker": 13,
+        "Recovery": 14,
+        "Rebounds": 12,
+        "OneOnOnes": 14,
+        "Agility": 14
+      },
+      "gp": null
+    }
+  },
+  "GER": {
+    "F": {
+      "name": "Kenny Agostino",
+      "club": "ERC Ingolstadt",
+      "CA": 110,
+      "PA": 110,
+      "tier": "DEL Elite F",
+      "role": "Winger: Playmaker (finesse)",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 10,
+        "Slapshot": 10,
+        "Passing": 10,
+        "Stickhandling": 12,
+        "Acceleration": 15,
+        "Pace": 15,
+        "Hitting": 4,
+        "Positioning": 10,
+        "Anticipation": 18,
+        "Decisions": 0,
+        "Creativity": 10,
+        "WorkRate": 14
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Alex Breton",
+      "club": "ERC Ingolstadt",
+      "CA": 110,
+      "PA": 114,
+      "tier": "DEL Elite D",
+      "role": "Defenceman: Offensive (finesse)",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 11,
+        "Slapshot": 10,
+        "Passing": 13,
+        "Stickhandling": 14,
+        "Acceleration": 17,
+        "Pace": 16,
+        "Hitting": 5,
+        "Positioning": 9,
+        "Anticipation": 18,
+        "Decisions": 0,
+        "Creativity": 12,
+        "WorkRate": 15
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Janne Juvonen",
+      "club": "Kölner Haie",
+      "CA": 110,
+      "PA": 110,
+      "tier": "DEL Elite G",
+      "role": "Goalie: Mixed",
+      "nat": "Finland",
+      "attrs": {
+        "Reflexes": 11,
+        "Positioning": 12,
+        "Glove": 12,
+        "Blocker": 11,
+        "Recovery": 11,
+        "Rebounds": 12,
+        "OneOnOnes": 11,
+        "Agility": 14
+      },
+      "gp": null
+    }
+  },
+  "CZE": {
+    "F": {
+      "name": "Roman Cervenka",
+      "club": "HC Dynamo Pardubice",
+      "CA": 109,
+      "PA": 109,
+      "tier": "ELH Elite F",
+      "role": "Centre: Playmaker",
+      "nat": "Czechia",
+      "attrs": {
+        "Wristshot": 10,
+        "Slapshot": 10,
+        "Passing": 13,
+        "Stickhandling": 11,
+        "Acceleration": 10,
+        "Pace": 10,
+        "Hitting": 4,
+        "Positioning": 8,
+        "Anticipation": 18,
+        "Decisions": 0,
+        "Creativity": 11,
+        "WorkRate": 10
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Jan Kostalek",
+      "club": "HC Vítkovice Ridera",
+      "CA": 110,
+      "PA": 110,
+      "tier": "ELH Elite D",
+      "role": "Defenceman: Offensive (finesse)",
+      "nat": "Czechia",
+      "attrs": {
+        "Wristshot": 11,
+        "Slapshot": 10,
+        "Passing": 12,
+        "Stickhandling": 12,
+        "Acceleration": 12,
+        "Pace": 13,
+        "Hitting": 4,
+        "Positioning": 10,
+        "Anticipation": 18,
+        "Decisions": 0,
+        "Creativity": 12,
+        "WorkRate": 10
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Stanislav Skorvanek",
+      "club": "Mountfield HK Hradec Králové",
+      "CA": 110,
+      "PA": 112,
+      "tier": "ELH Elite G",
+      "role": "Goalie: Hybrid/Unorthodox",
+      "nat": "Slovakia",
+      "attrs": {
+        "Reflexes": 13,
+        "Positioning": 13,
+        "Glove": 13,
+        "Blocker": 12,
+        "Recovery": 13,
+        "Rebounds": 13,
+        "OneOnOnes": 13,
+        "Agility": 14
+      },
+      "gp": null
+    }
+  },
+  "SUI": {
+    "F": {
+      "name": "Denis Malgin",
+      "club": "ZSC Lions",
+      "CA": 120,
+      "PA": 124,
+      "tier": "NL Elite F",
+      "role": "Centre: Sniper",
+      "nat": "Switzerland",
+      "attrs": {
+        "Wristshot": 13,
+        "Slapshot": 11,
+        "Passing": 11,
+        "Stickhandling": 11,
+        "Acceleration": 15,
+        "Pace": 17,
+        "Hitting": 6,
+        "Positioning": 10,
+        "Anticipation": 17,
+        "Decisions": 0,
+        "Creativity": 10,
+        "WorkRate": 11
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Erik Brännström",
+      "club": "Lausanne HC",
+      "CA": 120,
+      "PA": 128,
+      "tier": "NL Elite D",
+      "role": "Defenceman: Offensive",
+      "nat": "Sweden",
+      "attrs": {
+        "Wristshot": 11,
+        "Slapshot": 13,
+        "Passing": 11,
+        "Stickhandling": 10,
+        "Acceleration": 17,
+        "Pace": 17,
+        "Hitting": 8,
+        "Positioning": 11,
+        "Anticipation": 17,
+        "Decisions": 0,
+        "Creativity": 11,
+        "WorkRate": 12
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Simon Hrubec",
+      "club": "ZSC Lions",
+      "CA": 120,
+      "PA": 120,
+      "tier": "NL Elite G",
+      "role": "Goalie: Butterfly",
+      "nat": "Czechia",
+      "attrs": {
+        "Reflexes": 14,
+        "Positioning": 14,
+        "Glove": 12,
+        "Blocker": 14,
+        "Recovery": 14,
+        "Rebounds": 13,
+        "OneOnOnes": 14,
+        "Agility": 14
+      },
+      "gp": null
+    }
+  },
+  "SVK": {
+    "F": {
+      "name": "Patrik Marcinek",
+      "club": "HKM Zvolen",
+      "CA": 89,
+      "PA": 95,
+      "tier": "SVK Elite F",
+      "role": "Centre: Power forward",
+      "nat": "Slovakia",
+      "attrs": {
+        "Wristshot": 9,
+        "Slapshot": 10,
+        "Passing": 8,
+        "Stickhandling": 8,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 9,
+        "Positioning": 9,
+        "Anticipation": 14,
+        "Decisions": 0,
+        "Creativity": 8,
+        "WorkRate": 9
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Ryan Sproul",
+      "club": "HK Poprad",
+      "CA": 90,
+      "PA": 90,
+      "tier": "SVK Elite D",
+      "role": "Defenceman: Pointman",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 8,
+        "Slapshot": 8,
+        "Passing": 8,
+        "Stickhandling": 8,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 6,
+        "Positioning": 8,
+        "Anticipation": 16,
+        "Decisions": 0,
+        "Creativity": 8,
+        "WorkRate": 9
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Jasper Patrikainen",
+      "club": "HK Nitra",
+      "CA": 90,
+      "PA": -6,
+      "tier": "SVK Elite G",
+      "role": "Goalie: Butterfly",
+      "nat": "Finland",
+      "attrs": {
+        "Reflexes": 14,
+        "Positioning": 14,
+        "Glove": 14,
+        "Blocker": 14,
+        "Recovery": 14,
+        "Rebounds": 13,
+        "OneOnOnes": 14,
+        "Agility": 14
+      },
+      "gp": null
+    }
+  },
+  "RUS": {
+    "F": {
+      "name": "Vitali Kravtsov",
+      "club": "Traktor Chelyabinsk",
+      "CA": 129,
+      "PA": 137,
+      "tier": "KHL Elite F",
+      "role": "Winger: Sniper (physical)",
+      "nat": "Russia",
+      "attrs": {
+        "Wristshot": 18,
+        "Slapshot": 18,
+        "Passing": 12,
+        "Stickhandling": 12,
+        "Acceleration": 16,
+        "Pace": 16,
+        "Hitting": 11,
+        "Positioning": 9,
+        "Anticipation": 13,
+        "Decisions": 0,
+        "Creativity": 10,
+        "WorkRate": 11
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Damir Sharipzyanov",
+      "club": "Avangard Omsk",
+      "CA": 130,
+      "PA": 132,
+      "tier": "KHL Elite D",
+      "role": "Defenceman: Standard",
+      "nat": "Russia",
+      "attrs": {
+        "Wristshot": 16,
+        "Slapshot": 16,
+        "Passing": 11,
+        "Stickhandling": 11,
+        "Acceleration": 11,
+        "Pace": 12,
+        "Hitting": 10,
+        "Positioning": 11,
+        "Anticipation": 14,
+        "Decisions": 0,
+        "Creativity": 11,
+        "WorkRate": 12
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Daniil Isayev",
+      "club": "Lokomotiv Yaroslavl",
+      "CA": 130,
+      "PA": -8,
+      "tier": "KHL Elite G",
+      "role": "Goalie: Mixed",
+      "nat": "Russia",
+      "attrs": {
+        "Reflexes": 11,
+        "Positioning": 11,
+        "Glove": 11,
+        "Blocker": 10,
+        "Recovery": 11,
+        "Rebounds": 11,
+        "OneOnOnes": 11,
+        "Agility": 12
+      },
+      "gp": null
+    }
+  },
+  "OHL": {
+    "F": {
+      "name": "Jack Pridham",
+      "club": "Kitchener Rangers",
+      "CA": 100,
+      "PA": -18,
+      "tier": "CHL Elite F",
+      "role": "Winger: Sniper",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 14,
+        "Slapshot": 12,
+        "Passing": 13,
+        "Stickhandling": 13,
+        "Acceleration": 13,
+        "Pace": 15,
+        "Hitting": 6,
+        "Positioning": 11,
+        "Anticipation": 13,
+        "Decisions": 13,
+        "Creativity": 12,
+        "WorkRate": 13
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Kashawn Aitcheson",
+      "club": "Barrie Colts",
+      "CA": 100,
+      "PA": -9,
+      "tier": "OHL → ELC (New York Islanders)",
+      "role": "Defenceman: Pointman (physical)",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 13,
+        "Slapshot": 14,
+        "Passing": 14,
+        "Stickhandling": 12,
+        "Acceleration": 12,
+        "Pace": 13,
+        "Hitting": 16,
+        "Positioning": 13,
+        "Anticipation": 14,
+        "Decisions": 11,
+        "Creativity": 12,
+        "WorkRate": 14
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Ryder Fetterolf",
+      "club": "Ottawa 67's",
+      "CA": 100,
+      "PA": -17,
+      "tier": "CHL Starter 1A G",
+      "role": "Goalie: Butterfly",
+      "nat": "United States",
+      "attrs": {
+        "Reflexes": 15,
+        "Positioning": 15,
+        "Glove": 15,
+        "Blocker": 15,
+        "Recovery": 15,
+        "Rebounds": 13,
+        "OneOnOnes": 15,
+        "Agility": 15
+      },
+      "gp": null
+    }
+  },
+  "WHL": {
+    "F": {
+      "name": "Alex Weiermair",
+      "club": "Portland Winterhawks",
+      "CA": 100,
+      "PA": -17,
+      "tier": "WHL → ELC (Vegas Golden Knights)",
+      "role": "Centre: All around",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 12,
+        "Slapshot": 10,
+        "Passing": 12,
+        "Stickhandling": 11,
+        "Acceleration": 13,
+        "Pace": 14,
+        "Hitting": 9,
+        "Positioning": 10,
+        "Anticipation": 17,
+        "Decisions": 17,
+        "Creativity": 11,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Bryce Pickford",
+      "club": "Montréal Canadiens",
+      "CA": 100,
+      "PA": -19,
+      "tier": "CHL Elite D",
+      "role": "Defenceman: Pointman",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 13,
+        "Slapshot": 14,
+        "Passing": 12,
+        "Stickhandling": 12,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 7,
+        "Positioning": 11,
+        "Anticipation": 14,
+        "Decisions": 16,
+        "Creativity": 11,
+        "WorkRate": 16
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Joshua Ravensbergen",
+      "club": "Prince George Cougars",
+      "CA": 100,
+      "PA": -20,
+      "tier": "CHL Starter 1A G",
+      "role": "Goalie: Mixed",
+      "nat": "Canada",
+      "attrs": {
+        "Reflexes": 17,
+        "Positioning": 15,
+        "Glove": 15,
+        "Blocker": 15,
+        "Recovery": 15,
+        "Rebounds": 15,
+        "OneOnOnes": 15,
+        "Agility": 15
+      },
+      "gp": null
+    }
+  },
+  "QMJHL": {
+    "F": {
+      "name": "Vincent Desjardins",
+      "club": "Blainville-Boisbriand Armada",
+      "CA": 100,
+      "PA": -6,
+      "tier": "CHL Elite F",
+      "role": "Centre: Playmaker (finesse)",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 10,
+        "Slapshot": 9,
+        "Passing": 13,
+        "Stickhandling": 12,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 4,
+        "Positioning": 9,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 11,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Jordan Tourigny",
+      "club": "Chicoutimi Saguenéens",
+      "CA": 100,
+      "PA": -6,
+      "tier": "CHL Elite D",
+      "role": "Defenceman: Offensive (finesse)",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 10,
+        "Slapshot": 9,
+        "Passing": 11,
+        "Stickhandling": 11,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 4,
+        "Positioning": 9,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 11,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Rudy Guimond",
+      "club": "Moncton Wildcats",
+      "CA": 100,
+      "PA": -18,
+      "tier": "CHL Starter 1A G",
+      "role": "Goalie: Butterfly",
+      "nat": "Canada",
+      "attrs": {
+        "Reflexes": 15,
+        "Positioning": 15,
+        "Glove": 15,
+        "Blocker": 15,
+        "Recovery": 15,
+        "Rebounds": 15,
+        "OneOnOnes": 15,
+        "Agility": 15
+      },
+      "gp": null
+    }
+  },
+  "NCAA": {
+    "F": {
+      "name": "Max Plante",
+      "club": "University of Minnesota-Duluth Bulldogs",
+      "CA": 100,
+      "PA": -8,
+      "tier": "CHL Elite F",
+      "role": "Winger: Playmaker",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 13,
+        "Slapshot": 11,
+        "Passing": 13,
+        "Stickhandling": 14,
+        "Acceleration": 15,
+        "Pace": 15,
+        "Hitting": 7,
+        "Positioning": 10,
+        "Anticipation": 14,
+        "Decisions": 15,
+        "Creativity": 13,
+        "WorkRate": 12
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Eric Pohlkamp",
+      "club": "University of Denver Pioneers",
+      "CA": 100,
+      "PA": -8,
+      "tier": "NCAA → ELC (San Jose Sharks)",
+      "role": "Defenceman: Pointman (physical)",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 12,
+        "Slapshot": 13,
+        "Passing": 11,
+        "Stickhandling": 11,
+        "Acceleration": 11,
+        "Pace": 12,
+        "Hitting": 14,
+        "Positioning": 12,
+        "Anticipation": 12,
+        "Decisions": 10,
+        "Creativity": 11,
+        "WorkRate": 12
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Michael Hrabal",
+      "club": "University of Massachusetts-Amherst Minutemen",
+      "CA": 98,
+      "PA": -20,
+      "tier": "NCAA → ELC (Utah Mammoth)",
+      "role": "Goalie: Butterfly",
+      "nat": "Czechia",
+      "attrs": {
+        "Reflexes": 15,
+        "Positioning": 14,
+        "Glove": 14,
+        "Blocker": 14,
+        "Recovery": 14,
+        "Rebounds": 14,
+        "OneOnOnes": 14,
+        "Agility": 14
+      },
+      "gp": null
+    }
+  },
+  "USHL": {
+    "F": {
+      "name": "Nicky Romeo",
+      "club": "Cedar Rapids RoughRiders",
+      "CA": 100,
+      "PA": -6,
+      "tier": "CHL Elite F",
+      "role": "Winger: Sniper (finesse)",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 12,
+        "Slapshot": 9,
+        "Passing": 10,
+        "Stickhandling": 11,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 4,
+        "Positioning": 9,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 10,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Bode Laylin",
+      "club": "Tri-City Storm",
+      "CA": 100,
+      "PA": -17,
+      "tier": "CHL Elite D",
+      "role": "Defenceman: Offensive",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 10,
+        "Slapshot": 11,
+        "Passing": 11,
+        "Stickhandling": 10,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 7,
+        "Positioning": 9,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 11,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Tobias Trejbal",
+      "club": "Youngstown Phantoms",
+      "CA": 100,
+      "PA": -19,
+      "tier": "CHL Starter 1A G",
+      "role": "Goalie: Butterfly",
+      "nat": "Czechia",
+      "attrs": {
+        "Reflexes": 15,
+        "Positioning": 15,
+        "Glove": 15,
+        "Blocker": 15,
+        "Recovery": 15,
+        "Rebounds": 15,
+        "OneOnOnes": 15,
+        "Agility": 15
+      },
+      "gp": null
+    }
+  },
+  "NAHL": {
+    "F": {
+      "name": "Oliver Barna",
+      "club": "Fairbanks Ice Dogs",
+      "CA": 78,
+      "PA": -12,
+      "tier": "NAHL Elite F",
+      "role": "Winger: All around",
+      "nat": "Hungary",
+      "attrs": {
+        "Wristshot": 9,
+        "Slapshot": 8,
+        "Passing": 9,
+        "Stickhandling": 8,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 6,
+        "Positioning": 8,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 9,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Noah Ziskie",
+      "club": "Bismarck Bobcats",
+      "CA": 76,
+      "PA": -12,
+      "tier": "NAHL First-Pair D",
+      "role": "Defenceman: Offensive",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 9,
+        "Slapshot": 9,
+        "Passing": 9,
+        "Stickhandling": 8,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 7,
+        "Positioning": 8,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 9,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Jack Solomon",
+      "club": "Austin Bruins",
+      "CA": 80,
+      "PA": -12,
+      "tier": "NAHL Elite G",
+      "role": "Goalie: Hybrid/Unorthodox",
+      "nat": "United States",
+      "attrs": {
+        "Reflexes": 14,
+        "Positioning": 14,
+        "Glove": 13,
+        "Blocker": 14,
+        "Recovery": 14,
+        "Rebounds": 12,
+        "OneOnOnes": 14,
+        "Agility": 14
+      },
+      "gp": null
+    }
+  },
+  "ECHL": {
+    "F": {
+      "name": "Brandon Hawkins",
+      "club": "Toledo Walleye",
+      "CA": 90,
+      "PA": 89,
+      "tier": "High ECHL Top 6 F",
+      "role": "Winger: Sniper (finesse)",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 10,
+        "Slapshot": 9,
+        "Passing": 10,
+        "Stickhandling": 11,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 7,
+        "Positioning": 10,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 0,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Nikita Sedov",
+      "club": "Bloomington Bison",
+      "CA": 90,
+      "PA": 104,
+      "tier": "High ECHL Top Pair D",
+      "role": "Defenceman: Offensive",
+      "nat": "Russia",
+      "attrs": {
+        "Wristshot": 7,
+        "Slapshot": 7,
+        "Passing": 12,
+        "Stickhandling": 9,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 7,
+        "Positioning": 10,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 0,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Dryden McKay",
+      "club": "Bloomington Bison",
+      "CA": 86,
+      "PA": 90,
+      "tier": "Medium ECHL Starter 1A G",
+      "role": "Goalie: Mixed",
+      "nat": "United States",
+      "attrs": {
+        "Reflexes": 9,
+        "Positioning": 9,
+        "Glove": 9,
+        "Blocker": 8,
+        "Recovery": 9,
+        "Rebounds": 9,
+        "OneOnOnes": 8,
+        "Agility": 9
+      },
+      "gp": null
+    }
+  },
+  "SPHL": {
+    "F": {
+      "name": "Leif Mattson",
+      "club": "Quad City Storm",
+      "CA": 80,
+      "PA": 88,
+      "tier": "Elite SPHL F",
+      "role": "Winger: All around",
+      "nat": "Canada",
+      "attrs": {
+        "Wristshot": 9,
+        "Slapshot": 9,
+        "Passing": 9,
+        "Stickhandling": 8,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 5,
+        "Positioning": 9,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 0,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "D": {
+      "name": "Cory Dennis",
+      "club": "Peoria Rivermen",
+      "CA": 80,
+      "PA": 84,
+      "tier": "Elite SPHL D",
+      "role": "Defenceman: Pointman",
+      "nat": "United States",
+      "attrs": {
+        "Wristshot": 7,
+        "Slapshot": 8,
+        "Passing": 10,
+        "Stickhandling": 8,
+        "Acceleration": 0,
+        "Pace": 0,
+        "Hitting": 7,
+        "Positioning": 11,
+        "Anticipation": 0,
+        "Decisions": 0,
+        "Creativity": 0,
+        "WorkRate": 0
+      },
+      "gp": null
+    },
+    "G": {
+      "name": "Nick Latinovich",
+      "club": "Peoria Rivermen",
+      "CA": 75,
+      "PA": 79,
+      "tier": "High Good SPHL G",
+      "role": "Goalie: Mixed",
+      "nat": "Canada",
+      "attrs": {
+        "Reflexes": 10,
+        "Positioning": 9,
+        "Glove": 9,
+        "Blocker": 9,
+        "Recovery": 9,
+        "Rebounds": 8,
+        "OneOnOnes": 10,
+        "Agility": 9
+      },
+      "gp": null
+    }
+  }
+}

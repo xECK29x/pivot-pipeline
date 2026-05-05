@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline Flow — Pivot Pipeline</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg-deep: #0a0e17;
+    --bg-surface: #111827;
+    --bg-card: #1a2236;
+    --bg-elevated: #1f2a42;
+    --border: #2a3654;
+    --text-primary: #e8ecf4;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --gradient-hero: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1a1033 100%);
+    --gradient-accent: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --font-display: 'Outfit', system-ui, sans-serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,23,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1400px; margin: 0 auto;
+    padding: 0 2rem; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 1.05rem; color: var(--text-primary);
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .nav-brand .logo {
+    width: 32px; height: 32px;
+    background: var(--gradient-accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.9rem; color: white;
+  }
+  .nav-links { display: flex; gap: 0.25rem; list-style: none; }
+  .nav-links a {
+    font-family: var(--font-display);
+    font-size: 0.85rem; font-weight: 500;
+    color: var(--text-muted);
+    padding: 0.4rem 0.85rem; border-radius: 6px;
+  }
+  .nav-links a:hover {
+    color: var(--text-primary); background: var(--bg-card);
+    text-decoration: none;
+  }
+
+  .hero {
+    background: var(--gradient-hero);
+    padding: 5rem 2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(59,130,246,0.10) 0%, transparent 60%);
+  }
+  .hero-inner {
+    max-width: 1400px; margin: 0 auto;
+    position: relative; z-index: 1;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem; color: var(--accent-cyan);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 40px; height: 2px; background: var(--gradient-accent);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    font-weight: 800; line-height: 1.1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #e8ecf4 0%, #94a3b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 1.1rem; color: var(--text-secondary);
+    max-width: 720px;
+  }
+
+  .content {
+    max-width: 1400px; margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.75rem; font-weight: 700;
+    margin: 3rem 0 1rem;
+  }
+  h2:first-of-type { margin-top: 0; }
+  p { color: var(--text-secondary); margin-bottom: 1rem; }
+  strong { color: var(--text-primary); font-weight: 600; }
+
+  /* PIPELINE FLOW — main visual */
+  .pipeline {
+    background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-deep) 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+
+  .stage {
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .stage:last-child { margin-bottom: 0; }
+
+  .stage-header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .stage-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; font-weight: 700;
+    background: var(--bg-card);
+    color: var(--accent-cyan);
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    letter-spacing: 0.1em;
+  }
+  .stage-title {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1.15rem;
+  }
+  .stage-desc {
+    font-size: 0.9rem; color: var(--text-muted);
+    margin-left: auto; max-width: 50%;
+    text-align: right;
+  }
+
+  .stage-body {
+    display: flex; gap: 0.75rem;
+    flex-wrap: wrap; align-items: stretch;
+  }
+
+  .node {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem 1.1rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem; font-weight: 500;
+    min-width: 140px;
+    transition: all 0.2s;
+    display: flex; flex-direction: column; gap: 0.25rem;
+    flex: 1; max-width: 220px;
+  }
+  .node:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-1px);
+  }
+  .node-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .node-title {
+    font-weight: 600;
+  }
+  .node-meta {
+    font-size: 0.72rem; color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .node.input { border-left: 3px solid var(--accent-cyan); }
+  .node.process { border-left: 3px solid var(--accent-blue); }
+  .node.scout { border-left: 3px solid var(--accent-purple); }
+  .node.merge { border-left: 3px solid var(--accent-amber); }
+  .node.output { border-left: 3px solid var(--accent-emerald); }
+
+  /* Arrow / connector */
+  .arrow-down {
+    width: 100%; display: flex; justify-content: center;
+    margin: 0.5rem 0; color: var(--text-muted);
+    font-size: 1.5rem; line-height: 1;
+  }
+
+  /* Pipeline tracks - parallel rails */
+  .tracks {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .track {
+    background: rgba(26,34,54,0.4);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .track-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .track-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-family: var(--font-display);
+    font-size: 0.8rem; color: white;
+  }
+  .track-icon.nhl { background: linear-gradient(135deg, #3b82f6, #1e40af); }
+  .track-icon.minor { background: linear-gradient(135deg, #10b981, #047857); }
+  .track-icon.intl { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+  .track-title {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1rem;
+  }
+  .track-count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; color: var(--text-muted);
+    margin-left: auto;
+  }
+  .track-leagues {
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .track-league {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .track-league-name { font-weight: 500; }
+  .track-league-count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; color: var(--text-muted);
+  }
+
+  /* Phase ladder for detailed view */
+  .phase-ladder {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    align-items: center;
+  }
+  .phase-pill {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    font-family: var(--font-display);
+    font-size: 0.8rem; font-weight: 500;
+    white-space: nowrap;
+  }
+  .phase-pill.primary { border-color: var(--accent-blue); background: rgba(59,130,246,0.08); }
+  .phase-pill.scout { border-color: var(--accent-purple); background: rgba(139,92,246,0.08); }
+  .phase-pill.merge { border-color: var(--accent-amber); background: rgba(245,158,11,0.08); }
+  .phase-pill-arrow {
+    color: var(--text-muted); font-size: 1rem;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    font-size: 0.85rem;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    color: var(--text-secondary);
+  }
+  .legend-swatch {
+    width: 20px; height: 4px; border-radius: 2px;
+  }
+
+  /* Connection visualization */
+  .connector-svg {
+    display: block;
+    margin: 1rem auto;
+    max-width: 100%;
+  }
+
+  /* Detail panel for stages */
+  .stage-detail {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-top: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+  .stage-detail strong { color: var(--text-primary); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem; text-align: center;
+    color: var(--text-muted); font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+  footer a { color: var(--text-secondary); }
+
+  @media (max-width: 768px) {
+    .nav-links a:not(:last-child) { display: none; }
+    .tracks { grid-template-columns: 1fr; }
+    .stage-desc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="./" style="text-decoration:none">
+      <div class="nav-brand">
+        <div class="logo">P</div>
+        <span>Pivot Pipeline</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="./">Home</a></li>
+      <li><a href="pipeline-guide.html">Pipeline Guide</a></li>
+      <li><a href="data-sources.html">Data Sources</a></li>
+      <li><a href="https://github.com/xECK29x/pivot-pipeline">GitHub →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Architecture</div>
+    <h1>Pipeline Flow</h1>
+    <p>From raw data scraping through master file build, modeling phases, scouting overlay, cross-pipeline reconciliation, final merge, and into the playable EHM database. The full architecture, end to end.</p>
+  </div>
+</header>
+
+<div class="content">
+
+<h2>The big picture</h2>
+<p>The Pivot Pipeline runs in five sequential stages. Each stage takes the output of the previous one and adds value — collecting raw data, normalizing it into master files, modeling per-player attributes, layering on scouting intelligence, reconciling players who appear in multiple leagues, and finally producing the EHM-importable database.</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-cyan)"></div>Data Input</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-blue)"></div>Modeling</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-purple)"></div>Scouting Overlay</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-amber)"></div>Reconciliation / Merge</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-emerald)"></div>Final Output</div>
+</div>
+
+<div class="pipeline">
+
+  <!-- STAGE 1: DATA INPUTS -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="stage-num">Stage 01</span>
+      <span class="stage-title">Data Collection</span>
+      <span class="stage-desc">60+ sources scraped, downloaded, or pulled via API into raw CSVs.</span>
+    </div>
+    <div class="stage-body">
+      <div class="node input">
+        <span class="node-label">NHL</span>
+        <span class="node-title">MoneyPuck · EH · EDGE · LB · HSC</span>
+        <span class="node-meta">20+ sources, 880 players</span>
+      </div>
+      <div class="node input">
+        <span class="node-label">AHL</span>
+        <span class="node-title">AHLTracker</span>
+        <span class="node-meta">Single-source, 2,000 players</span>
+      </div>
+      <div class="node input">
+        <span class="node-label">European</span>
+        <span class="node-title">Sportality · hokej.cz · liiga.fi · penny-del · nlicedata · hockeyslovakia</span>
+        <span class="node-meta">12 leagues, 5,500 players</span>
+      </div>
+      <div class="node input">
+        <span class="node-label">Junior</span>
+        <span class="node-title">chl.ca · CHN · HockeyTech · GameSheet</span>
+        <span class="node-meta">6 leagues, 4,000 players</span>
+      </div>
+      <div class="node input">
+        <span class="node-label">Russian</span>
+        <span class="node-title">khl.ru</span>
+        <span class="node-meta">KHL + VHL, 1,500 players</span>
+      </div>
+      <div class="node input">
+        <span class="node-label">Career / Tags</span>
+        <span class="node-title">EliteProspects (EP2EHM, U23, style tags)</span>
+        <span class="node-meta">All players, multi-year</span>
+      </div>
+      <div class="node input">
+        <span class="node-label">Scouting Prose</span>
+        <span class="node-title">The Athletic (Wheeler) · EP U23 reports</span>
+        <span class="node-meta">630+ NHL prospects</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">↓</div>
+
+  <!-- STAGE 2: MASTER BUILD -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="stage-num">Stage 02</span>
+      <span class="stage-title">Master File Build</span>
+      <span class="stage-desc">All raw inputs joined per-player into one canonical master CSV per league pipeline.</span>
+    </div>
+    <div class="stage-body">
+      <div class="node process">
+        <span class="node-label">NHL Master</span>
+        <span class="node-title">build_master_vNext.py</span>
+        <span class="node-meta">~1,000 columns, 1 row/player</span>
+      </div>
+      <div class="node process">
+        <span class="node-label">AHL Master</span>
+        <span class="node-title">build_ahl_master.py</span>
+        <span class="node-meta">~750 columns</span>
+      </div>
+      <div class="node process">
+        <span class="node-label">European Masters</span>
+        <span class="node-title">build_european_master.py</span>
+        <span class="node-meta">7 country builds</span>
+      </div>
+      <div class="node process">
+        <span class="node-label">Junior Masters</span>
+        <span class="node-title">build_junior_master.py</span>
+        <span class="node-meta">CHL · NCAA · USHL · NAHL</span>
+      </div>
+      <div class="node process">
+        <span class="node-label">KHL/VHL Master</span>
+        <span class="node-title">build_khl_master.py</span>
+      </div>
+    </div>
+    <div class="stage-detail">
+      <strong>What this does:</strong> Each pipeline has its own column convention (NHL uses <code>nhlmisc_*</code>, <code>edgeSpeed_*</code>, <code>ehgar_*</code>; SHL uses <code>shl_*</code>; etc.). The master build joins every available data source by player ID, normalizes column types, applies hard-fail checks for required signals, and produces one consolidated master file per league.
+    </div>
+  </div>
+
+  <div class="arrow-down">↓</div>
+
+  <!-- STAGE 3: MODELING -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="stage-num">Stage 03</span>
+      <span class="stage-title">Modeling</span>
+      <span class="stage-desc">Each pipeline runs its own sequence of modeling scripts, calibrated to that league's data depth.</span>
+    </div>
+
+    <div class="tracks">
+      <!-- NHL Track -->
+      <div class="track">
+        <div class="track-header">
+          <div class="track-icon nhl">N</div>
+          <div class="track-title">NHL Track</div>
+          <div class="track-count">10 phases</div>
+        </div>
+        <div class="track-leagues">
+          <div class="track-league"><span class="track-league-name">Phase 2 — Physicality</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 3 — Defense</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 4 — Skating</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 5 — Offense / Cognition</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 5b — Career Mentals</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 6 — Faceoffs</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 7 — Goalies</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 7b — Goalie Mentals</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 8 — CA & Roles</span></div>
+        </div>
+      </div>
+
+      <!-- Minor Pro Track -->
+      <div class="track">
+        <div class="track-header">
+          <div class="track-icon minor">M</div>
+          <div class="track-title">Minor / Junior Track</div>
+          <div class="track-count">3 phases</div>
+        </div>
+        <div class="track-leagues">
+          <div class="track-league"><span class="track-league-name">Skater Model</span><span class="track-league-count">unified</span></div>
+          <div class="track-league"><span class="track-league-name">Goalie Model</span><span class="track-league-count">unified</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 3 — CA & Roles</span></div>
+          <div class="track-league" style="background:rgba(16,185,129,0.06);border-color:var(--accent-emerald)"><span class="track-league-name">AHL · ECHL · SPHL</span></div>
+          <div class="track-league" style="background:rgba(16,185,129,0.06);border-color:var(--accent-emerald)"><span class="track-league-name">CHL · NCAA · USHL · NAHL</span></div>
+        </div>
+      </div>
+
+      <!-- International Track -->
+      <div class="track">
+        <div class="track-header">
+          <div class="track-icon intl">I</div>
+          <div class="track-title">International Track</div>
+          <div class="track-count">3 phases</div>
+        </div>
+        <div class="track-leagues">
+          <div class="track-league"><span class="track-league-name">Skater Model</span><span class="track-league-count">league-aware</span></div>
+          <div class="track-league"><span class="track-league-name">Goalie Model</span><span class="track-league-count">league-aware</span></div>
+          <div class="track-league"><span class="track-league-name">Phase 3 — CA & Roles</span></div>
+          <div class="track-league" style="background:rgba(139,92,246,0.06);border-color:var(--accent-purple)"><span class="track-league-name">SWE · FIN · GER · CZE</span></div>
+          <div class="track-league" style="background:rgba(139,92,246,0.06);border-color:var(--accent-purple)"><span class="track-league-name">SUI · SVK · RUS</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage-detail">
+      <strong>The NHL pipeline is the gold standard.</strong> Other pipelines mirror its architecture but compress phases when data signal doesn't justify separating them. With 20+ analytical sources, the NHL can isolate physicality from defense from skating from offense as separate modeling phases. With single-source AHLTracker data, the AHL collapses Phases 2-6 into one skater model because the signals overlap too much for separate treatment.
+    </div>
+  </div>
+
+  <div class="arrow-down">↓</div>
+
+  <!-- STAGE 4: SCOUTING OVERLAY -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="stage-num">Stage 04</span>
+      <span class="stage-title">Scouting Overlay</span>
+      <span class="stage-desc">Hand-scouted prospect intelligence layers attribute nudges on top of analytics.</span>
+    </div>
+    <div class="stage-body">
+      <div class="node scout">
+        <span class="node-label">Wheeler Pipeline</span>
+        <span class="node-title">The Athletic prose</span>
+        <span class="node-meta">471 NHL prospects, 17 categories</span>
+      </div>
+      <div class="node scout">
+        <span class="node-label">EP U23</span>
+        <span class="node-title">Tool grades + prose</span>
+        <span class="node-meta">Future Value, 6 tool grades</span>
+      </div>
+      <div class="node scout">
+        <span class="node-label">EP Style Tags</span>
+        <span class="node-title">All players</span>
+        <span class="node-meta">Sniper, Power Forward, etc.</span>
+      </div>
+      <div class="node scout">
+        <span class="node-label">Hand-Curated CHL/NCAA</span>
+        <span class="node-title">Top ~215 prospects</span>
+        <span class="node-meta">9-category nudges</span>
+      </div>
+      <div class="node scout">
+        <span class="node-label">Max-Not-Sum Resolution</span>
+        <span class="node-title">Multi-source dedup</span>
+        <span class="node-meta">No double-stacking adjustments</span>
+      </div>
+    </div>
+    <div class="stage-detail">
+      <strong>What scouting catches that stats can't:</strong> release mechanics, edge work, compete level, body language, whether a 19-year-old's stride has another gear coming. Statistical models capture <em>what</em> a player did; scouting prose captures <em>how</em> and <em>why</em>. The overlay nudges modeled attributes by typically 1–2 points (rarely more) up or down based on expert observation.
+    </div>
+  </div>
+
+  <div class="arrow-down">↓</div>
+
+  <!-- STAGE 5: RECONCILIATION + MERGE -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="stage-num">Stage 05</span>
+      <span class="stage-title">Cross-Pipeline Reconciliation &amp; Final Merge</span>
+      <span class="stage-desc">Players in multiple leagues are reconciled; all pipelines merge into one EHM-ready database.</span>
+    </div>
+    <div class="stage-body">
+      <div class="node merge">
+        <span class="node-label">Multi-League ID</span>
+        <span class="node-title">Identify overlap players</span>
+        <span class="node-meta">Callups, loans, mid-season trades</span>
+      </div>
+      <div class="node merge">
+        <span class="node-label">Primary League</span>
+        <span class="node-title">Quality-preferred selection</span>
+        <span class="node-meta">Where they actually played most</span>
+      </div>
+      <div class="node merge">
+        <span class="node-label">Secondary Signals</span>
+        <span class="node-title">Bounded supplementary nudges</span>
+        <span class="node-meta">Don't throw away other-league data</span>
+      </div>
+      <div class="node merge">
+        <span class="node-label">Final Master</span>
+        <span class="node-title">Combined output</span>
+        <span class="node-meta">~14,500 players unified</span>
+      </div>
+    </div>
+    <div class="stage-detail">
+      <strong>The "Eklund problem":</strong> A Swedish kid who plays 43 SHL games and then comes over for a 12-game AHL audition shouldn't be rated on the AHL's tiny sample. Reconciliation identifies these players, picks the right primary signal source (43 SHL > 12 AHL), and uses the supplementary league as a bounded adjustment rather than a coin-flip override. NCAA-to-NHL signings, AHL callups, European loans — all handled identically.
+    </div>
+  </div>
+
+  <div class="arrow-down">↓</div>
+
+  <!-- STAGE 6: OUTPUT -->
+  <div class="stage">
+    <div class="stage-header">
+      <span class="stage-num">Stage 06</span>
+      <span class="stage-title">EHM Database Export</span>
+      <span class="stage-desc">Final ratings exported in EHM editor format, ready for database import.</span>
+    </div>
+    <div class="stage-body">
+      <div class="node output">
+        <span class="node-label">Staff Export</span>
+        <span class="node-title">EHM editor format</span>
+        <span class="node-meta">All 39+ skater attrs, 20+ goalie attrs</span>
+      </div>
+      <div class="node output">
+        <span class="node-label">QA Reports</span>
+        <span class="node-title">Distribution + audit HTML</span>
+        <span class="node-meta">Per-pipeline quality checks</span>
+      </div>
+      <div class="node output">
+        <span class="node-label">Premier Pivot Rosters</span>
+        <span class="node-title">Released to community</span>
+        <span class="node-meta">TBL Forum · Steam Workshop · Discord</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h2>How the modeling actually shapes ratings</h2>
+<p>Inside each modeling phase, the same general flow applies. Raw data signals are converted to per-60 rates, normalized within position groups, blended with reliability weighting (small samples regress toward neutral averages), and mapped to the 1–20 EHM attribute scale via normal-CDF distribution shaping.</p>
+
+<div class="phase-ladder">
+  <div class="phase-pill">Raw signal (e.g. Hits/60)</div>
+  <span class="phase-pill-arrow">→</span>
+  <div class="phase-pill">Position-group z-score</div>
+  <span class="phase-pill-arrow">→</span>
+  <div class="phase-pill">Reliability-weighted blend</div>
+  <span class="phase-pill-arrow">→</span>
+  <div class="phase-pill">Normal-CDF mapping</div>
+  <span class="phase-pill-arrow">→</span>
+  <div class="phase-pill primary">Modeled rating (1–20)</div>
+  <span class="phase-pill-arrow">→</span>
+  <div class="phase-pill scout">Scouting nudge ±1–2</div>
+  <span class="phase-pill-arrow">→</span>
+  <div class="phase-pill">Final attribute</div>
+</div>
+
+<p style="margin-top:1.5rem">For the full phase-by-phase breakdown — what data each phase reads, what attributes it produces, what the formulas actually do — see the <a href="pipeline-guide.html">Pipeline Guide</a>.</p>
+
+<h2>Where to dig deeper</h2>
+<p>This page is the architectural overview. Three places to go from here:</p>
+
+<ul style="list-style:none;padding:0;margin-top:1rem">
+  <li style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem">
+    <strong>→ <a href="pipeline-guide.html">The Pipeline Guide</a></strong><br>
+    <span style="color:var(--text-secondary);font-size:0.9rem">Full visual walkthrough of every modeling phase, the CA tier system, the role suggestion engine, and how it all comes together.</span>
+  </li>
+  <li style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem">
+    <strong>→ <a href="data-sources.html">Data Sources by League</a></strong><br>
+    <span style="color:var(--text-secondary);font-size:0.9rem">What data each of the 17 league pipelines uses, with three real example players per league showing what the data actually drove.</span>
+  </li>
+  <li style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem">
+    <strong>→ <a href="https://github.com/xECK29x/pivot-pipeline/tree/main/specs">Design Specs</a></strong><br>
+    <span style="color:var(--text-secondary);font-size:0.9rem">Technical reference docs — NHL gold standard, AHL/European tier-2 adaptations, gap-filling techniques, porting checklist.</span>
+  </li>
+</ul>
+
+</div>
+
+<footer>
+  <p>
+    <strong>Pivot Pipeline</strong> · Pipeline Flow<br>
+    <a href="./">Home</a> · <a href="https://github.com/xECK29x/pivot-pipeline">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>
