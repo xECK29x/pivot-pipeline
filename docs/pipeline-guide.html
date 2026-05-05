@@ -963,7 +963,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
     <div class="phase-header" onclick="togglePhase(this)">
       <span class="phase-number">Phase 2</span>
       <span class="phase-title">Physicality</span>
-      <span class="phase-attrs">Hitting · Checking · Aggression · Fighting · Bravery · WorkRate · Strength · Balance</span>
+      <span class="phase-attrs">WorkRate · Hitting · Fighting · Aggression · Dirtiness · Agitation · Bravery · Sportsmanship · Temperament</span>
       <span class="phase-chevron">▼</span>
     </div>
     <div class="phase-body">
@@ -975,14 +975,15 @@ if PA ≥ 180 AND score > average AND role is offensive:
 
         <h4>Attributes Modeled</h4>
         <p>
-          <span class="attr-pill modeled">Hitting</span>
-          <span class="attr-pill modeled">Checking</span>
-          <span class="attr-pill modeled">Aggression</span>
-          <span class="attr-pill modeled">Fighting</span>
-          <span class="attr-pill modeled">Bravery</span>
           <span class="attr-pill modeled">WorkRate</span>
-          <span class="attr-pill modeled">Strength</span>
-          <span class="attr-pill modeled">Balance</span>
+          <span class="attr-pill modeled">Hitting</span>
+          <span class="attr-pill modeled">Fighting</span>
+          <span class="attr-pill modeled">Aggression</span>
+          <span class="attr-pill modeled">Dirtiness</span>
+          <span class="attr-pill modeled">Agitation</span>
+          <span class="attr-pill modeled">Bravery</span>
+          <span class="attr-pill modeled">Sportsmanship</span>
+          <span class="attr-pill modeled">Temperament</span>
         </p>
 
         <h4>Key Data Signals</h4>
@@ -994,7 +995,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
           <div class="signal-item">NHL.com Penalties (fighting majors, roughing)</div>
           <div class="signal-item">Evolving Hockey RAPM net impact</div>
           <div class="signal-item">MoneyPuck on-ice xG differential</div>
-          <div class="signal-item">BMI z-scores (for Strength and Balance)</div>
+          <div class="signal-item">NHL.com Penalty type breakdown (minor/major/misconduct)</div>
           <div class="signal-item">LB Hockey: D-Zone Pressure Mitigation</div>
         </div>
 
@@ -1007,7 +1008,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
 
         <p><strong>WorkRate</strong> combines engagement metrics (RAPM net impact, on-ice involvement) with effort signals. It's designed to capture the "motor" — players who are consistently engaged shift after shift.</p>
 
-        <p><strong>Strength</strong> and <strong>Balance</strong> are the only Phase 2 attributes with a physical measurement component — they use BMI z-scores calculated from actual player height and weight data. This is why the pipeline hard-fails if height/weight data is missing.</p>
+        <p><strong>Aggression</strong> and <strong>Dirtiness</strong> separate clean physical play from chippy/nasty play. Aggression is driven by overall PIM/60 rate; Dirtiness rises with the misconduct and match-penalty share of those PIMs. <strong>Sportsmanship</strong> and <strong>Temperament</strong> work in the inverse direction — players with low penalty rates and clean profiles rate higher in these attributes. <strong>Agitation</strong> captures drawing-penalty tendency from penalty-drawn metrics where available.</p>
 
         <div class="callout warn">
           <div class="callout-label">Design Note</div>
@@ -1025,7 +1026,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
     <div class="phase-header" onclick="togglePhase(this)">
       <span class="phase-number">Phase 3</span>
       <span class="phase-title">Defensive Skills</span>
-      <span class="phase-attrs">Positioning · Pokecheck · ShotBlocking · Marking</span>
+      <span class="phase-attrs">Positioning · Checking · Pokecheck · DefensiveRole</span>
       <span class="phase-chevron">▼</span>
     </div>
     <div class="phase-body">
@@ -1038,9 +1039,9 @@ if PA ≥ 180 AND score > average AND role is offensive:
         <h4>Attributes Modeled</h4>
         <p>
           <span class="attr-pill modeled">Positioning</span>
+          <span class="attr-pill modeled">Checking</span>
           <span class="attr-pill modeled">Pokecheck</span>
-          <span class="attr-pill modeled">ShotBlocking</span>
-          <span class="attr-pill modeled">Marking</span>
+          <span class="attr-pill modeled">DefensiveRole</span>
         </p>
 
         <h4>Key Data Signals</h4>
@@ -1059,7 +1060,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
         <h4>How It Works</h4>
         <p><strong>Positioning</strong> — the most important defensive attribute per the research notes — is now anchored by LB Hockey's Chance Suppression (direct measure of preventing quality chances against), Evolving Hockey's RAPM xGA/60 (isolated individual defensive impact), and Evolving Hockey giveaway/takeaway rates. A shutdown defenseman who suppresses chances and mitigates zone pressure is properly recognized even if he doesn't rack up blocked shots.</p>
 
-        <p><strong>Pokecheck</strong> captures stick-on-puck defensive execution, driven by takeaway rates, blocked shots, and chance suppression. <strong>ShotBlocking</strong> is relatively straightforward — it's primarily driven by blocked shot rates from NHL.com data. <strong>Marking</strong> captures positional awareness in coverage, using on-ice chance suppression and relative metrics.</p>
+        <p><strong>Checking</strong> captures body-checking effectiveness — driven by hit rates and contact engagement signals from NHL.com plus zone-time context from EDGE deployment data. <strong>Pokecheck</strong> captures stick-on-puck defensive execution, driven by takeaway rates, blocked shots, and chance suppression. <strong>DefensiveRole</strong> reflects deployment trust and willingness to commit to defensive play, anchored by penalty-kill TOI share and short-handed deployment.</p>
 
         <p>Phase 3 applies a global <strong>+2 lift</strong> to skater defensive skill attributes. This reflects the research notes guidance that NHL-level players should generally have respectable defensive fundamentals — the floor of NHL defensive ability is higher than the EHM scale's midpoint.</p>
 
@@ -1076,7 +1077,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
     <div class="phase-header" onclick="togglePhase(this)">
       <span class="phase-number">Phase 4</span>
       <span class="phase-title">Skating &amp; Conditioning</span>
-      <span class="phase-attrs">Acceleration · Pace · Stamina · NaturalFitness · Agility</span>
+      <span class="phase-attrs">Acceleration · Pace · Agility · Balance · Stamina · NaturalFitness</span>
       <span class="phase-chevron">▼</span>
     </div>
     <div class="phase-body">
@@ -1090,9 +1091,10 @@ if PA ≥ 180 AND score > average AND role is offensive:
         <p>
           <span class="attr-pill modeled">Acceleration</span>
           <span class="attr-pill modeled">Pace</span>
+          <span class="attr-pill modeled">Agility</span>
+          <span class="attr-pill modeled">Balance</span>
           <span class="attr-pill modeled">Stamina</span>
           <span class="attr-pill modeled">NaturalFitness</span>
-          <span class="attr-pill modeled">Agility</span>
         </p>
 
         <h4>Key Data Signals</h4>
@@ -1103,7 +1105,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
           <div class="signal-item">EDGE: Total skating distance per game</div>
           <div class="signal-item">EDGE: Distance per shift</div>
           <div class="signal-item">TOI-based workload metrics</div>
-          <div class="signal-item">BMI z-scores (Agility component)</div>
+          <div class="signal-item">BMI z-scores (Agility and Balance)</div>
         </div>
 
         <h4>How It Works</h4>
@@ -1111,7 +1113,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
 
         <p><strong>Stamina</strong> and <strong>NaturalFitness</strong> combine EDGE skating distance data (total distance per game, distance per shift) with traditional workload metrics (TOI, shifts per game). A player who covers more ground per shift and maintains consistent shift lengths deep into games rates higher on conditioning.</p>
 
-        <p><strong>Agility</strong> uses BMI-based z-scores as its primary input, with goalie-specific handling. Per the EHM research notes, skating attributes don't significantly affect goalie performance, so goalies receive conservative skating ratings.</p>
+        <p><strong>Agility</strong> and <strong>Balance</strong> are derived from BMI z-scores calculated from actual player height and weight data — and they pull in opposite directions. Lighter, smaller players trend toward higher Agility (more nimble); heavier, larger players trend toward higher Balance (harder to knock off the puck). This is why the pipeline hard-fails if height/weight data is missing. Per the EHM research notes, skating attributes don't significantly affect goalie performance, so goalies receive conservative ratings here with a goalie-specific Agility floor for athletically elite netminders.</p>
 
         <div class="callout">
           <div class="callout-label">EDGE Data Coverage</div>
@@ -1126,14 +1128,14 @@ if PA ≥ 180 AND score > average AND role is offensive:
     <div class="phase-header" onclick="togglePhase(this)">
       <span class="phase-number">Phase 5</span>
       <span class="phase-title">Cognitive &amp; Offensive Skills</span>
-      <span class="phase-attrs">Anticipation · Decisions · Creativity · Passing · Movement · Stickhandling · Wristshot · Slapshot · Flair · Vision</span>
+      <span class="phase-attrs">Anticipation · Decisions · Creativity · Passing · Movement · Stickhandling · Wristshot · Slapshot · Deking · Deflections · Flair · OffensiveRole · PassTendency</span>
       <span class="phase-chevron">▼</span>
     </div>
     <div class="phase-body">
       <div class="phase-content">
         <div class="eli5">
           <div class="eli5-label">The Simple Version</div>
-          <p>Phase 5 answers: <strong>"How does this player create offense and make plays?"</strong> This is the biggest and most analytically complex phase — it shapes playmaking instincts, attacking awareness, shooting technique, and vision. This phase received the most dramatic vNext improvements: z-score mapping, Bayesian shrinkage, and the elite tail boost all landed here.</p>
+          <p>Phase 5 answers: <strong>"How does this player create offense and make plays?"</strong> This is the biggest and most analytically complex phase — it shapes playmaking instincts, attacking awareness, shooting technique, and on-ice creativity. This phase received the most dramatic vNext improvements: z-score mapping, Bayesian shrinkage, and the elite tail boost all landed here.</p>
         </div>
 
         <h4>Attributes Modeled</h4>
@@ -1146,8 +1148,11 @@ if PA ≥ 180 AND score > average AND role is offensive:
           <span class="attr-pill modeled">Stickhandling</span>
           <span class="attr-pill modeled">Wristshot</span>
           <span class="attr-pill modeled">Slapshot</span>
+          <span class="attr-pill modeled">Deking</span>
+          <span class="attr-pill modeled">Deflections</span>
           <span class="attr-pill modeled">Flair</span>
-          <span class="attr-pill modeled">Vision</span>
+          <span class="attr-pill modeled">OffensiveRole</span>
+          <span class="attr-pill modeled">PassTendency</span>
         </p>
 
         <h4>Key Data Signals</h4>
@@ -1612,7 +1617,7 @@ Tier Label Re-derivation → CA Delta → Write to Master</div>
         <div class="card-icon blue">🎯</div>
         <div class="card-title">Offensive Archetypes</div>
       </div>
-      <p>Sniper, Playmaker, Playmaker (Finesse), Offensive, Power Forward, Dangler, and their sub-variants. These emphasize Wristshot, Slapshot, Passing, Vision, Creativity, and OffensiveRole.</p>
+      <p>Sniper, Playmaker, Playmaker (Finesse), Offensive, Power Forward, Dangler, and their sub-variants. These emphasize Wristshot, Slapshot, Passing, Stickhandling, Creativity, and OffensiveRole.</p>
     </div>
     <div class="card">
       <div class="card-header">
@@ -1626,7 +1631,7 @@ Tier Label Re-derivation → CA Delta → Write to Master</div>
         <div class="card-icon red">💪</div>
         <div class="card-title">Physical Archetypes</div>
       </div>
-      <p>Grinder, Enforcer, Power Forward (Physical), Energy. These emphasize Hitting, Checking, Aggression, Fighting, Bravery, and Strength.</p>
+      <p>Grinder, Enforcer, Power Forward (Physical), Energy. These emphasize Hitting, Aggression, Fighting, Bravery, and WorkRate.</p>
     </div>
     <div class="card">
       <div class="card-header">
