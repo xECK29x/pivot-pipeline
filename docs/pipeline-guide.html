@@ -1015,6 +1015,11 @@ if PA ≥ 180 AND score > average AND role is offensive:
           <p>Phase 2 attributes are <em>behavioral tendencies</em>, not performance multipliers. Per the EHM research notes, they influence the frequency and likelihood of actions — a high Hitting rating means the player attempts more hits, not that his hits are more effective. This is why Phase 2 uses event rates rather than outcome metrics.</p>
         </div>
 
+        <div class="callout">
+          <div class="callout-label">A Note on Strength</div>
+          <p><strong>Strength</strong> is a real EHM attribute, but it's not modeled in this pipeline. It's set via a separate algorithm built directly into the EHM Editor — primarily driven by player size and weight — and applied as a downstream step rather than through the analytical modeling phases. The pipeline doesn't override the Editor's Strength values.</p>
+        </div>
+
         <h4>Role Context</h4>
         <p>Roles matter in Phase 2 more than most phases. An Enforcer has Fighting and Aggression as KEY attributes (floor: 14) with Hitting and Bravery as ESSENTIAL (floor: 13). A Playmaker doesn't have physicality attributes as key, so they follow the standard distribution. This ensures role-appropriate ratings without artificially inflating everyone.</p>
       </div>
@@ -1172,7 +1177,7 @@ if PA ≥ 180 AND score > average AND role is offensive:
         </div>
 
         <h4>How It Works</h4>
-        <p><strong>Cognitive attributes</strong> (Anticipation, Decisions, Creativity) are the hardest to model from stats alone — you can't directly measure "hockey sense." The pipeline uses proxy signals: expected goals differentials (if a player consistently creates more xGF than average, they're making good decisions), transition play grades (players who successfully carry the puck through the neutral zone demonstrate anticipation), and relative on-ice metrics (players who make their teammates better show creative playmaking).</p>
+        <p><strong>Cognitive attributes</strong> (Anticipation, Decisions, Creativity) are the hardest to model from stats alone — you can't directly measure "hockey sense" or "vision." Creativity in EHM is effectively the vision/playmaking-IQ attribute, and the pipeline uses proxy signals to capture it: expected goals differentials (if a player consistently creates more xGF than average, they're making good decisions), transition play grades (players who successfully carry the puck through the neutral zone demonstrate anticipation), and relative on-ice metrics (players who make their teammates better show creative playmaking). When EH and LB Hockey both flag a player as elite in transition and zone offense, that's a Creativity signal even when the box score doesn't show it.</p>
 
         <p><strong>Passing</strong> is anchored to distribution impact: Primary Assists/60, assist ratios, and LB Hockey's Puck Management and OZ Pressure grades. It's deliberately separated from shot volume — a great passer creates quality looks for teammates, which shows up in assist rates and team expected goals rather than personal shot counts.</p>
 
