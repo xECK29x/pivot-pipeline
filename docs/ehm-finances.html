@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How Financial Info rows, spread factors, minimum wages, club status and TV money work in Eastside Hockey Manager, with a wage calculator.">
+<title>EHM Finances Explained</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column for a reference document; wide tables scroll inside their own frame; a contents list up top. */
+:root{
+  --bg:#f2f5f7; --surface:#ffffff; --ink:#15222c; --muted:#55636e; --line:#d5dde3; --accent:#0a6a8f; --accent-soft:#e2f0f6;
+  --ok:#1f6b45; --ok-bg:#dff1e6; --code:#7a5200; --code-bg:#f8ebcc; --unk:#5a4a7d; --unk-bg:#e9e3f4;
+  --font-display:"Space Grotesk","Segoe UI",system-ui,sans-serif; --font-body:"Inter","Segoe UI",system-ui,sans-serif; --font-data:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f171d; --surface:#17222a; --ink:#e4ebf0; --muted:#9aa9b4; --line:#2b3a45; --accent:#5cc0e6; --accent-soft:#16303c;
+  --ok:#7fd3a3; --ok-bg:#173326; --code:#ecc46a; --code-bg:#3a2e12; --unk:#c1b0ea; --unk-bg:#2a2340; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f171d; --surface:#17222a; --ink:#e4ebf0; --muted:#9aa9b4; --line:#2b3a45; --accent:#5cc0e6; --accent-soft:#16303c;
+  --ok:#7fd3a3; --ok-bg:#173326; --code:#ecc46a; --code-bg:#3a2e12; --unk:#c1b0ea; --unk-bg:#2a2340; color-scheme:dark }
+html{-webkit-text-size-adjust:100%}*,*::before,*::after{box-sizing:border-box}img{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+.page{max-width:54rem;margin:0 auto;padding-block:2.5rem 4rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:1rem}
+.page>*{min-width:0;margin:0}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.15;text-wrap:balance}
+.lede{color:var(--muted);max-width:65ch}
+h2{font-family:var(--font-display);font-weight:600;font-size:1.45rem;line-height:1.25;text-wrap:balance;padding-top:1.6rem;border-top:1px solid var(--line);margin-top:1.2rem}
+h3{font-family:var(--font-display);font-weight:600;font-size:1.1rem;margin-top:.6rem}
+p,li{max-width:68ch}
+ul,ol{padding-left:1.3rem;display:flex;flex-direction:column;gap:.35rem}
+a{color:var(--accent)} a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1rem 1.2rem}
+.toc h2{border:0;padding:0;margin:0 0 .5rem;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--font-body);font-weight:600}
+.toc ol{columns:2;column-gap:2rem;display:block}.toc li{margin-bottom:.25rem;break-inside:avoid}
+@media (max-width:560px){.toc ol{columns:1}}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;vertical-align:top;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);font-size:.8rem;letter-spacing:.03em;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:.08rem .5rem;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.code{background:var(--code-bg);color:var(--code)}.pill.unk{background:var(--unk-bg);color:var(--unk)}
+.formula{background:var(--accent-soft);border-left:3px solid var(--accent);padding:.8rem 1rem;font-family:var(--font-data);font-size:.92rem;max-width:none;overflow-wrap:anywhere}
+.calc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1.2rem;display:flex;flex-direction:column;gap:.9rem;margin-top:.6rem}
+.calc>*{margin:0;min-width:0}.calc h3{margin:0}
+.calc-note{color:var(--muted);font-size:.92rem}
+.presets{display:flex;flex-wrap:wrap;gap:.5rem}
+.presets button{font:inherit;font-size:.85rem;padding:.35rem .7rem;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);cursor:pointer}
+.presets button:hover{border-color:var(--accent)}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.8rem}
+.calc-grid label{display:flex;flex-direction:column;gap:.3rem;font-size:.82rem;color:var(--muted);font-weight:500}
+.calc-grid input{font:inherit;font-family:var(--font-data);font-size:1rem;padding:.5rem .6rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.calc-out{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem;max-width:none}
+.calc-k{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#c-out{font-family:var(--font-display);font-size:2rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.calc-sub{color:var(--muted);font-size:.9rem}
+.chart-wrap{overflow-x:auto}#c-chart{width:100%;min-width:320px;height:auto;display:block}
+.foot{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:1rem;margin-top:1.5rem}
+</style>
+</head>
+<body>
+<main class="page">
+<h1>How finances work in Eastside Hockey Manager</h1>
+<p class="lede">What the Financial Info rows, spread factors, minimum wages, club status and league TV money actually do, from tests on EHM 1.5.0 (build 1669120) with the TBL database. Draft v0.1, 19 November 2026.</p>
+<nav class="toc" aria-label="Contents"><h2>Contents</h2><ol><li><a href="#s-1-the-short-version">The short version</a></li><li><a href="#s-2-where-the-settings-live">Where the settings live</a></li><li><a href="#s-3-professional-status">Professional status</a></li><li><a href="#s-4-which-financial-info-row-a-club-uses">Which Financial Info row a club uses</a></li><li><a href="#s-5-the-wage-formula">The wage formula</a></li><li><a href="#s-6-financial-info-field-by-field">Financial Info, field by field</a></li><li><a href="#s-7-the-club-wage-budget">The club wage budget</a></li><li><a href="#s-8-player-wages">Player wages</a></li><li><a href="#s-9-staff-wages">Staff wages</a></li><li><a href="#s-10-where-a-club-s-money-comes-from-and-goes">Where a club&#x27;s money comes from and goes</a></li><li><a href="#s-11-tv-money-and-prize-money">TV money and prize money</a></li><li><a href="#s-12-playable-and-background-leagues">Playable and background leagues</a></li><li><a href="#s-13-the-two-new-game-options">The two new-game options</a></li><li><a href="#s-14-fixing-common-problems">Fixing common problems</a></li><li><a href="#s-15-what-we-still-do-not-know">What we still do not know</a></li><li><a href="#s-16-how-this-was-tested">How this was tested</a></li></ol></nav>
+<p>Draft v0.1, 19 November 2026. For database editors and players who want to know what the finance settings actually do. Written from tests on EHM 1.5.0 (build 1669120) with the TBL database.</p>
+<h2 id="s-how-to-read-this">How to read this</h2>
+<p>Every statement carries one of three labels.</p>
+<div class="tw"><table><thead><tr><th>Label</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="pill ok">Tested</span></td><td>We changed a value or ran a simulation and read the result from the game's saves and screens.</td></tr><tr><td><span class="pill code">From the game&#x27;s code</span></td><td>Read from the game's own program logic. It has not been separately confirmed by a simulation.</td></tr><tr><td><span class="pill unk">Not known</span></td><td>We looked and could not find the rule.</td></tr></tbody></table></div>
+<p>All money is yearly unless it says weekly. The game stores contract wages weekly, so a 1,500 salary becomes 28 a week and shows as 1,456 in some places.</p>
+<h2 id="s-1-the-short-version">1. The short version</h2>
+<ul><li>A club's <strong>Professional status</strong> decides which finance rules apply to it at all. An Amateur club has a wage budget of zero and its board will not approve a paid contract.</li><li><strong>Financial Info</strong> rows hold the wage curves and the budget range. Each club uses one row.</li><li>Wages come from one formula. The <strong>spread factor</strong> is the exponent in it: a high spread means only high-reputation clubs and people get much above the minimum.</li><li>The <strong>minimum full-time salary</strong> is the starting point of every wage, for players and staff alike.</li><li>A league's <strong>minimum and maximum player wage</strong> live in its transfer rules, not in Financial Info.</li><li><strong>TV money</strong> is set per league and paid to every club in full. It is the cleanest way to fix a league whose clubs lose money.</li><li>A league that is not loaded as playable does not run a real economy. Do not judge a league's finances from a save where it was in the background.</li></ul>
+<h2 id="s-2-where-the-settings-live">2. Where the settings live</h2>
+<div class="tw"><table><thead><tr><th>Setting</th><th>Where in the Editor</th><th>What it controls</th></tr></thead><tbody><tr><td>Professional status</td><td>Club, Basic Data</td><td>Which budget and wage rules the club gets</td></tr><tr><td>Player budget, Cash</td><td>Club, Finances</td><td>Starting wage budget and bank balance</td></tr><tr><td>Reputation, attendance, market size</td><td>Club</td><td>Feed the wage and budget formulas and gate income</td></tr><tr><td>Financial Info rows</td><td>Financial Info</td><td>Wage curves, minimum wages, budget range, junior allowance</td></tr><tr><td>Min / max player wage, contract length, roster limits</td><td>League transfer rules</td><td>Hard limits on player contracts in that league</td></tr><tr><td>Total TV money, Total prize money</td><td>Competition, Comp Rules, League Rules</td><td>Yearly league payouts</td></tr><tr><td>Salary per person</td><td>Staff / player record</td><td>The wage a person starts the game on</td></tr><tr><td>Disable Starting Wage Adjustments</td><td>New-game screen</td><td>Whether the game may change database salaries</td></tr><tr><td>Disable Starting Financial Adjustments</td><td>New-game screen</td><td>Whether the game may change starting balances and budgets</td></tr></tbody></table></div>
+<h2 id="s-3-professional-status">3. Professional status</h2>
+<p>This is the first thing to check when a club cannot sign anyone.</p>
+<div class="tw"><table><thead><tr><th>Status</th><th>Wage budget</th><th>Staff contracts</th><th>What we saw</th></tr></thead><tbody><tr><td>Professional</td><td>From the Financial Info budget curve</td><td>Full-time</td><td>Normal behaviour</td></tr><tr><td>Semi-Professional</td><td>From the same curve at three-quarters strength</td><td>Part-time, with the part-time minimum as the floor</td><td>Normal behaviour</td></tr><tr><td>Junior</td><td><strong>Junior salary allowance × 25</strong>, whatever the database says</td><td>Full-time</td><td>1,500 allowance gives 37,500</td></tr><tr><td>Amateur</td><td><strong>Zero</strong></td><td>None can be paid</td><td>Board allows $0</td></tr></tbody></table></div>
+<p>The Junior and Amateur rows of that table are tested. The Professional and Semi-Professional budget rules are from the game's code.</p>
+<ul><li><strong>Tested: Amateur clubs cannot pay anyone.</strong> In one world, every one of 3,160 Amateur clubs had a budget of 0, and across ten weeks not one of them negotiated a signing. A human manager at an Amateur club saw "Your board will allow a salary up to $0" on a staff offer.</li><li><strong>Tested: changing the status fixes it.</strong> Setting the 62 NCAA clubs from Amateur to Junior gave each a budget of 37,500 on day one, with the database budget left at 0. The board then allowed staff offers, and over a full season every club signed staff and made money.</li><li><strong>Tested: the Junior budget does not hold AI clubs back.</strong> Major junior clubs carry payrolls of 150,000 to 300,000 on a 37,500 budget and sign players every year. The finance screen compares the Player Budget with <em>player</em> salaries only, and junior players earn very little.</li><li><strong>From the game's code:</strong> an Amateur club's wage offer is computed as 0 before any Financial Info value is looked at. So no Financial Info setting can rescue an Amateur club.</li><li><strong>From the game's code:</strong> the statuses None, National (Senior) and National (U20) are not valid for a club that plays in a league.</li></ul>
+<p>College leagues are a special case inside the game. A college player's current season shows as "N/A" on the contract screen whatever the club's status, and college clubs receive a yearly intake of new players in late August. <strong>Tested:</strong> both still happen with the clubs set to Junior. The intake was 17 to 20 years old, and rosters still ran up to age 24.</p>
+<h2 id="s-4-which-financial-info-row-a-club-uses">4. Which Financial Info row a club uses</h2>
+<p><strong>From the game's code.</strong> The game walks the Financial Info table from the top and takes the first row that fits:</p>
+<ol><li>a row whose league is the club's league;</li><li>otherwise a nation-only row for the nation of the club's league;</li><li>otherwise a nation-only row for the club's own nation;</li><li>otherwise the first row, which has no nation or league and acts as the default.</li></ol>
+<p>Things that follow from that:</p>
+<ul><li><strong>A league row only wins if it sits above the nation rows in the table.</strong> A league row added below its nation's row is never reached.</li><li>A nation with only one row uses it for every league in that nation, top flight and third tier alike. Clubs then differ only through their own reputation.</li><li><strong>Tested:</strong> the NCAA has its own row in the TBL database and does not fall back to the United States row.</li></ul>
+<h2 id="s-5-the-wage-formula">5. The wage formula</h2>
+
+<p>Almost everything in Financial Info feeds this one formula.</p>
+<p class="formula"><strong>wage = minimum full-time salary + (maximum − minimum full-time salary) × (reputation ÷ 10,000) ^ spread factor</strong></p>
+<ul><li><em>maximum</em> is the Max salary for the job or position.</li><li><em>reputation</em> runs from 0 to 10,000.</li><li><em>spread factor</em> is the Player spread factor for players and the Non-player spread factor for staff.</li></ul>
+<p>Whose reputation is used depends on the question:</p>
+<div class="tw"><table><thead><tr><th>Question</th><th>Reputation used</th></tr></thead><tbody><tr><td>What will this club pay? (board limit, and staff wages when a game is created)</td><td>The <strong>club's</strong> reputation</td></tr><tr><td>What does this person ask for?</td><td>The <strong>person's</strong> own reputation, blended with ability for players</td></tr></tbody></table></div>
+<p>So a club can afford a person when the club's standing is at least as good as the person's. The two numbers come off the same curve, which is why changing a row moves both the board's limit and the candidates' asks.</p>
+<p><strong>Tested:</strong> when a game is created, staff wages follow this formula using the club's reputation. For physios and other minor staff it matched to the dollar at every reputation level we checked. For coaches and head coaches it matched at lower reputations and came in <em>under</em> the formula at higher ones, so treat the formula as an upper limit there. What trims the top end is not known.</p>
+<h3>What the spread factor does</h3>
+<p>The spread factor decides how much of the gap between minimum and maximum a given reputation earns.</p>
+<div class="tw"><table><thead><tr><th>Reputation</th><th>Spread 2</th><th>Spread 3</th><th>Spread 4</th><th>Spread 5</th></tr></thead><tbody><tr><td>2,000</td><td>4.0%</td><td>0.8%</td><td>0.16%</td><td>0.03%</td></tr><tr><td>3,500</td><td>12.3%</td><td>4.3%</td><td>1.5%</td><td>0.5%</td></tr><tr><td>5,000</td><td>25.0%</td><td>12.5%</td><td>6.3%</td><td>3.1%</td></tr><tr><td>7,500</td><td>56.3%</td><td>42.2%</td><td>31.6%</td><td>23.7%</td></tr><tr><td>10,000</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td></tr></tbody></table></div>
+<ul><li><strong>Low spread: wages rise early.</strong> Mid-reputation clubs pay well above the minimum.</li><li><strong>High spread: wages stay on the floor</strong> until reputation is high, then climb steeply.</li><li>A spread of 4 or more puts every club below about 3,000 reputation on the minimum, however large the maximum is.</li></ul>
+<p><strong>Tested example, Great Britain row</strong> (head coach maximum 625,000, minimum 10,000):</p>
+<div class="tw"><table><thead><tr><th>Club</th><th>Reputation</th><th>Board limit at spread 4.0</th><th>Board limit at spread 3.0</th></tr></thead><tbody><tr><td>Second-tier club</td><td>2,000</td><td>10,000</td><td>13,500</td></tr></tbody></table></div>
+<p>At spread 4.0 a head coach asking 11,000 could not be signed. At 3.0 the same club's limit rose to 13,500 and the offer went through. The candidate's ask rose as well, from 10,000 to 12,000, because asks use the same row.</p>
+<p><strong>Tested example, NCAA row.</strong> With a head coach maximum of 4,000,000 and spread 2.25, college head coaches started on 106,000 to 250,000 and club payrolls were around 420,000. With the maximum at 750,000 and spread 3.5 they started on 21,000 to 56,000. The maximum and the spread together set the level, so change them as a pair.</p>
+<section class="calc" aria-labelledby="calc-h">
+<h3 id="calc-h">Wage calculator</h3>
+<p class="calc-note">Enter a Financial Info row's values and a reputation. This is the formula above and nothing else: the game can still trim the result at higher-reputation clubs, and league minimum and maximum wages apply on top for players.</p>
+<div class="presets" role="group" aria-label="Examples">
+<button type="button" data-p="10000,625000,3,2000">Great Britain head coach, club at 2,000</button>
+<button type="button" data-p="10000,1250000,3.5,4000">NCAA head coach, club at 4,000</button>
+<button type="button" data-p="10000,230000,3.5,4000">United States coach, club at 4,000</button>
+</div>
+<div class="calc-grid">
+<label for="c-min">Min full-time salary<input id="c-min" type="number" inputmode="numeric" min="250" step="500" value="10000"></label>
+<label for="c-max">Max salary for the job<input id="c-max" type="number" inputmode="numeric" min="250" step="5000" value="625000"></label>
+<label for="c-spread">Spread factor<input id="c-spread" type="number" inputmode="decimal" min="1" max="10" step="0.05" value="3"></label>
+<label for="c-rep">Reputation (0 to 10,000)<input id="c-rep" type="number" inputmode="numeric" min="0" max="10000" step="50" value="2000"></label>
+</div>
+<p class="calc-out"><span class="calc-k">Wage</span> <output id="c-out" for="c-min c-max c-spread c-rep">–</output> <span class="calc-sub" id="c-sub"></span></p>
+<div class="chart-wrap"><svg id="c-chart" viewBox="0 0 640 260" role="img" aria-label="Wage against reputation for the values entered"></svg></div>
+<div class="tw"><table class="calc-table"><thead><tr><th>Reputation</th><th>Wage</th><th>Share of the gap earned</th></tr></thead><tbody id="c-rows"></tbody></table></div>
+</section>
+<h2 id="s-6-financial-info-field-by-field">6. Financial Info, field by field</h2>
+<div class="tw"><table><thead><tr><th>Field</th><th>What it does</th><th>Label</th></tr></thead><tbody><tr><td>Nation, League</td><td>Decide which clubs use the row (section 4)</td><td><span class="pill code">From the game&#x27;s code</span></td></tr><tr><td>Max forward / defenceman / goalie salary</td><td>Top of the player wage curve for that position</td><td><span class="pill code">From the game&#x27;s code</span></td></tr><tr><td>Player spread factor</td><td>Exponent of the player wage curve</td><td><span class="pill code">From the game&#x27;s code</span></td></tr><tr><td>Max GM/head coach salary</td><td>Top of the staff curve for GMs and head coaches. One field covers both jobs</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Max coach salary</td><td>Top of the curve for coaches and assistant GMs</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Max scout salary</td><td>Top of the curve for scouts</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Max other non-player salary</td><td>Top of the curve for physios and remaining staff</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Non-player spread factor</td><td>Exponent of the staff curve</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Min full-time salary</td><td>Starting point of every wage, players and staff. Floor for a Professional club. Also sets a floor under the club budget (20 × this)</td><td>Tested for staff; rest from the game's code</td></tr><tr><td>Min part-time salary</td><td>Wage floor at a Semi-Professional club, and 20 × this is its budget floor</td><td><span class="pill code">From the game&#x27;s code</span></td></tr><tr><td>Junior salary allowance</td><td>× 25 = a Junior club's wage budget</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Foreign player salary boost</td><td>Multiplies a foreign player's wage ask</td><td><span class="pill code">From the game&#x27;s code</span></td></tr><tr><td>Min salary budget, Max salary budget</td><td>The range of club wage budgets for Professional and Semi-Professional clubs</td><td><span class="pill code">From the game&#x27;s code</span></td></tr><tr><td>Salary budget spread factor</td><td>Exponent of the budget curve</td><td><span class="pill code">From the game&#x27;s code</span></td></tr><tr><td>The "Median" columns</td><td>Shown by the Editor for guidance. They are worked out from the other fields and change when you change a spread factor</td><td><span class="pill ok">Tested</span></td></tr></tbody></table></div>
+<p>Notes:</p>
+<ul><li><strong>The minimum full-time salary is not a league minimum wage.</strong> It is where the curve starts. A league's real minimum for players is in its transfer rules (section 8).</li><li><strong>The salary budget fields do nothing for Junior or Amateur clubs.</strong> A Junior club's budget is the allowance × 25 and an Amateur club's is zero.</li><li>The game refuses values outside these ranges: spread factors 1 to 10; foreign boost 1 to 5; minimum salaries and junior allowance at least 250; minimum budget at least 5,000; maximum budget no more than 100,000,000. (From the game's code.)</li></ul>
+<h2 id="s-7-the-club-wage-budget">7. The club wage budget</h2>
+<p><strong>From the game's code.</strong> For a Professional or Semi-Professional club:</p>
+<p class="formula"><strong>budget = min salary budget + (max − min salary budget) × (club strength ÷ 200) ^ salary budget spread factor</strong></p>
+<ul><li><em>club strength</em> starts from the club's reputation ÷ 50 and is scaled by the chairman's resources, the attraction of the club's city, its market size and its financial state.</li><li>The result is rounded to 10,000 and kept above 20 × the minimum full-time salary (20 × the part-time minimum for a Semi-Professional club).</li><li>In a league with a salary cap, the budget is also tied to the cap.</li></ul>
+<p><strong>Tested:</strong></p>
+<ul><li><strong>What the finance screen compares.</strong> "Player Budget" is set against "Total Player Salaries". Staff wages are not counted.</li><li><strong>Day one.</strong> With Starting Financial Adjustments left on, the game changes the database budgets straight away. One league authored at 920,000 for every club started at 700,000 to 920,000; another authored at 690,000 started at 410,000 to 530,000.</li><li><strong>Every season rollover the budget is set again, and it follows the club's money.</strong> In one season we saw rises of 11% to 35% at profitable clubs, a 10% cut at clubs that finished in the red, and every Junior club go from 37,500 to 43,125.</li><li><strong>Budgets do not strictly limit AI clubs.</strong> Clubs commonly run payrolls somewhat over budget.</li></ul>
+<h2 id="s-8-player-wages">8. Player wages</h2>
+<h3>Starting wages</h3>
+<div class="tw"><table><thead><tr><th>Situation</th><th>What the game does</th><th>Label</th></tr></thead><tbody><tr><td>Player has a database salary, <strong>Disable Starting Wage Adjustments ticked</strong></td><td>Keeps it. All 1,450 NHL salaries survived</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Player has a database salary, option <strong>not</strong> ticked</td><td>May change it. 37 NHL players changed: young players on expiring deals jumped to 4.6M–9.4M and some veterans were cut to the league minimum</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Player has <strong>no</strong> database salary</td><td>The game sets it, mostly at the league minimum, whichever way the option is set</td><td><span class="pill ok">Tested</span></td></tr></tbody></table></div>
+<ul><li>Tick "Disable Starting Wage Adjustments" if you want the database's salaries respected.</li><li>The option does nothing for players without a salary. If a league's players have none, most of them start on the minimum.</li><li>Even with the option ticked, a small number of salaries in a few leagues were still lowered by roughly 10%. The cause is not known.</li></ul>
+<h3>League limits</h3>
+<p>These are in the league's transfer rules, not in Financial Info.</p>
+<div class="tw"><table><thead><tr><th>Rule</th><th>Effect</th><th>Label</th></tr></thead><tbody><tr><td>Contract player min yearly wage</td><td>No player in the league is paid less. A lower database salary is lifted to it. Applies to players only, never staff</td><td>Tested for the level; rest from the game's code</td></tr><tr><td>Contract player max yearly wage</td><td>Ceiling on any player contract. This is the figure the board quotes for a player offer</td><td><span class="pill ok">Tested</span></td></tr><tr><td>Contract max years</td><td>Longest contract</td><td><span class="pill code">From the game&#x27;s code</span></td></tr></tbody></table></div>
+<ul><li><strong>Tested:</strong> the board allowed a player offer up to exactly the league maximum (40,000 in one league, 30,000 in another).</li><li><strong>A high minimum wage is expensive.</strong> In one second-tier league 71% of players sat on a 35,000 minimum. With rosters growing from 23 to 31 during the season, the minimum alone set most of the wage bill.</li><li>A league with the minimum and maximum set to the same number has exactly one legal wage. That works: junior and college leagues are set up this way.</li></ul>
+<h3>Asks</h3>
+<p><strong>From the game's code.</strong> A player's ask comes from the wage formula using a blend of his reputations and current ability, then:</p>
+<ul><li>is reduced for very high asks and for players aged 34 and over;</li><li>is multiplied by the foreign player boost if he is foreign;</li><li>is capped at the league maximum and floored at the league minimum.</li></ul>
+<h2 id="s-9-staff-wages">9. Staff wages</h2>
+<ul><li><strong>Tested:</strong> staff normally have no salary in the database, so the game sets every staff wage when the game is created, from the club's reputation and its Financial Info row (section 5).</li><li><strong>Tested:</strong> the board's limit for a staff offer comes from the same calculation. At a low-reputation club with a steep spread factor, the limit is the minimum full-time salary and nothing more.</li><li><strong>From the game's code:</strong> league minimum wage rules do not apply to staff. The floor for staff is the minimum full-time salary, or the part-time minimum at a Semi-Professional club.</li><li>A Semi-Professional club offers staff part-time contracts.</li></ul>
+<p>If users report that they cannot hire staff, check in this order: the club's Professional status, then the row's Non-player spread factor, then the staff maximums.</p>
+<h2 id="s-10-where-a-club-s-money-comes-from-and-goes">10. Where a club's money comes from and goes</h2>
+<p>The finance screen's lines are stored per club for this month, last month, this season and last season. <strong>Tested:</strong> the stored lines match the screen exactly, and month to month the balance changes by income minus expenditure.</p>
+<h3>Income</h3>
+<div class="tw"><table><thead><tr><th>Line</th><th>What we found</th></tr></thead><tbody><tr><td>TV Revenue</td><td>Section 11. Often the largest line outside the top leagues</td></tr><tr><td>Gate Receipts, Season Tickets</td><td>Follow attendance and ticket price. Small for clubs with low prices</td></tr><tr><td>Merchandising</td><td>Steady through the season</td></tr><tr><td>Other</td><td>Large for many clubs. What drives it is not known</td></tr><tr><td>Prize Money, Interest, Players Shipped Out, Investments</td><td>Small or occasional in our tests</td></tr></tbody></table></div>
+<h3>Expenditure</h3>
+<div class="tw"><table><thead><tr><th>Line</th><th>What we found</th></tr></thead><tbody><tr><td>Wages</td><td>Players and staff together</td></tr><tr><td>Ice Rink/Arena Maintenance</td><td>Can be nearly as large as wages at a small club</td></tr><tr><td>Other</td><td>A steady cost through the season</td></tr><tr><td>Players Acquired, Signing On Fees, Bonuses</td><td>Occasional</td></tr><tr><td>A year-end charge</td><td>See below</td></tr></tbody></table></div>
+<h3>The year-end charge</h3>
+<p><strong>Tested.</strong> At the end of each season the game takes a large one-off amount from clubs with a healthy bank balance. It tracks the balance, not that season's profit:</p>
+<ul><li>about half the balance in most leagues;</li><li>about 80% in one top European league and about 90% in the NHL.</li></ul>
+<p>It behaves like owners taking out accumulated cash. A club can show a "loss" for the year because of it while being profitable on its operations. The exact rule, and the threshold above which it applies, are not known.</p>
+<h3>What healthy and unhealthy look like</h3>
+<p>One season, median club, all leagues loaded as playable:</p>
+<div class="tw"><table><thead><tr><th>League type</th><th>Income</th><th>Wages</th><th>Result for the season</th></tr></thead><tbody><tr><td>NHL</td><td>about 155M</td><td>about 115M</td><td>about +9M before the year-end charge</td></tr><tr><td>Top European league</td><td>4M–10M</td><td>1.9M–5.2M</td><td>+0.5M to +1.2M</td></tr><tr><td>College (as Junior)</td><td>1.1M</td><td>0.15M</td><td>+0.8M</td></tr><tr><td>Second-tier league, healthy</td><td>1.7M–2.4M</td><td>0.9M–1.4M</td><td>around break-even to +0.3M</td></tr><tr><td>Second-tier league with no TV money and a high minimum wage</td><td>0.6M–1.8M</td><td>0.7M–1.6M</td><td>−0.3M to −0.6M</td></tr></tbody></table></div>
+<p>A rough guide from those seasons: leagues where wages took about 60% of income sat at break-even, with around half their clubs losing money. Every league above 80% lost money. Healthy leagues were at 50% or less.</p>
+<h2 id="s-11-tv-money-and-prize-money">11. TV money and prize money</h2>
+<p>Set per league under Comp Rules, League Rules.</p>
+<ul><li><strong>Tested: "Total TV money" is paid to every club in full.</strong> It is not a pot that is shared out. A league set to 4,000,000 pays each of its clubs 4,000,000.</li><li><strong>Tested:</strong> it is paid on the first day of the season and again at each season rollover.</li><li><strong>Tested:</strong> changing it changes each club's income by exactly that amount in the first season. Six leagues whose clubs lost money were moved to break-even or a small profit by this alone.</li><li>North American leagues store 0 here and the game works out its own figure per club. The rule is not known.</li><li>"Total prize money" is a separate pot divided by the prize money type. We have not tested it.</li></ul>
+<p><strong>A caution.</strong> Extra income raises the club's budget at the next rollover (section 7), and clubs then spend more. In one league the clubs spent about a quarter of a large TV increase on wages within the first season. Judge a change over two seasons, not one.</p>
+<h2 id="s-12-playable-and-background-leagues">12. Playable and background leagues</h2>
+<p><strong>Tested.</strong> The game runs a full economy only for leagues loaded as playable.</p>
+<div class="tw"><table><thead><tr><th>League state</th><th>What the game runs</th></tr></thead><tbody><tr><td>Playable</td><td>Every income and expenditure line</td></tr><tr><td>Background</td><td>No wage lines and almost no income, but some costs are still charged</td></tr><tr><td>Not simulated</td><td>A small charge only</td></tr></tbody></table></div>
+<p>So in a long save, the clubs of background leagues drift deep into the red. That is how the game handles leagues it is not simulating in detail. Two leagues that looked ruinous as background leagues were comfortably profitable when loaded as playable.</p>
+<p><strong>Only judge a league's finances from a save in which it was playable.</strong></p>
+<h2 id="s-13-the-two-new-game-options">13. The two new-game options</h2>
+<div class="tw"><table><thead><tr><th>Option</th><th>Ticked</th><th>Not ticked (default)</th></tr></thead><tbody><tr><td>Disable Starting Wage Adjustments</td><td>Database salaries are used as entered</td><td>The game may raise or cut them</td></tr><tr><td>Disable Starting Financial Adjustments</td><td>Database balances and budgets are used as entered</td><td>The game sets starting balances and adjusts budgets</td></tr></tbody></table></div>
+<ul><li><strong>Tested:</strong> the wage option works as described (section 8).</li><li>The financial option was left at its default in all our tests. The TBL database stores a cash balance of 0 for every club, so ticking it would most likely start every club with nothing.</li></ul>
+<h2 id="s-14-fixing-common-problems">14. Fixing common problems</h2>
+<div class="tw"><table><thead><tr><th>Symptom</th><th>Likely cause</th><th>Where to look</th></tr></thead><tbody><tr><td>Board allows $0 for any contract</td><td>Club is Amateur</td><td>Club, Professional status</td></tr><tr><td>Players sign but staff cannot be hired</td><td>Staff limit sits on the minimum salary</td><td>Financial Info: Non-player spread factor, then staff maximums</td></tr><tr><td>Staff are paid far too much</td><td>Staff maximums too high for the spread factor</td><td>Same two settings, lowered together</td></tr><tr><td>A league's clubs lose money every year</td><td>Wages exceed what the league earns</td><td>League TV money; league minimum wage; then budgets</td></tr><tr><td>Most players in a league earn the same low wage</td><td>They have no database salary, or the league minimum equals most asks</td><td>Player salaries; league minimum wage</td></tr><tr><td>Stars on expiring deals start on huge wages</td><td>Starting wage adjustments are on</td><td>Tick Disable Starting Wage Adjustments</td></tr><tr><td>A new league row has no effect</td><td>It sits below the nation row</td><td>Financial Info table order</td></tr><tr><td>A league looks bankrupt in a long save</td><td>It was a background league</td><td>Reload with the league playable before changing anything</td></tr></tbody></table></div>
+<p>When you change something, change one kind of setting at a time, check day one, then simulate at least one full season with the league playable. Two seasons if you changed income.</p>
+<h2 id="s-15-what-we-still-do-not-know">15. What we still do not know</h2>
+<ul><li>What trims coach and head coach wages below the formula at higher-reputation clubs.</li><li>The rule and threshold for the year-end charge.</li><li>How the game sets TV revenue for North American leagues.</li><li>What drives the "Other" income line.</li><li>Why a handful of NHL clubs take a very large arena charge late in the season.</li><li>Why a few database salaries are still lowered with wage adjustments disabled.</li><li>How far into the red a club must be before its board stops a human manager signing people.</li><li>Whether the Starting Financial Adjustments option keeps an authored budget through later seasons.</li></ul>
+<h2 id="s-16-how-this-was-tested">16. How this was tested</h2>
+<ul><li>Several new games were started from the same database with one setting changed each time, and the saves were read on day one, monthly, and after each season rollover.</li><li>Club balances, budgets, contracts and finance lines were read directly from the save files and checked against the in-game finance and contract screens.</li><li>One ten-year save and one two-season save with many leagues playable supplied the long-run figures.</li><li>Statements labelled "From the game's code" come from reading the game's program logic for build 1669120. Other builds may differ.</li></ul>
+<p class="foot">Draft v0.1. Statements labelled "From the game's code" were read from the game's program logic for build 1669120 and may differ in other builds.</p>
+</main>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)}, ids=['c-min','c-max','c-spread','c-rep'];
+  var fmt=function(n){return Math.round(n).toLocaleString('en-US')};
+  function wage(mn,mx,sp,rep){return mn+(mx-mn)*Math.pow(Math.max(0,Math.min(10000,rep))/10000,sp)}
+  function draw(){
+    var mn=+$('c-min').value||0, mx=+$('c-max').value||0, sp=+$('c-spread').value||1, rep=+$('c-rep').value||0;
+    if(mx<mn) mx=mn; sp=Math.max(1,Math.min(10,sp)); rep=Math.max(0,Math.min(10000,rep));
+    var w=wage(mn,mx,sp,rep), share=Math.pow(rep/10000,sp)*100;
+    $('c-out').textContent='$'+fmt(w);
+    $('c-sub').textContent=(share<0.1&&share>0?share.toFixed(3):share.toFixed(1))+'% of the gap between minimum and maximum';
+    var rows='', reps=[1000,2000,3000,4000,5000,6000,7500,9000,10000];
+    reps.forEach(function(r){var s=Math.pow(r/10000,sp)*100; rows+='<tr><td>'+fmt(r)+'</td><td>$'+fmt(wage(mn,mx,sp,r))+'</td><td>'+(s<0.1?s.toFixed(3):s.toFixed(1))+'%</td></tr>'});
+    $('c-rows').innerHTML=rows;
+    var W=640,H=260,l=74,r=16,t=14,b=38,pw=W-l-r,ph=H-t-b, top=Math.max(mx,mn+1);
+    var X=function(v){return l+pw*v/10000}, Y=function(v){return t+ph*(1-(v-0)/top)};
+    var s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="none"></rect>';
+    [0,0.25,0.5,0.75,1].forEach(function(f){var v=top*f,y=Y(v); s+='<line x1="'+l+'" x2="'+(W-r)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)" stroke-width="1"></line><text x="'+(l-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="11" fill="var(--muted)">$'+fmt(v)+'</text>'});
+    [0,2500,5000,7500,10000].forEach(function(v){s+='<text x="'+X(v)+'" y="'+(H-b+18)+'" text-anchor="'+(v===0?'start':v===10000?'end':'middle')+'" font-size="11" fill="var(--muted)">'+fmt(v)+'</text>'});
+    s+='<text x="'+(l+pw/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="11" fill="var(--muted)">Reputation</text>';
+    var d=''; for(var i=0;i<=100;i++){var rv=i*100; d+=(i?'L':'M')+X(rv).toFixed(1)+' '+Y(wage(mn,mx,sp,rv)).toFixed(1)}
+    s+='<path d="'+d+'" fill="none" stroke="var(--accent)" stroke-width="2.5"></path>';
+    s+='<line x1="'+X(rep)+'" x2="'+X(rep)+'" y1="'+t+'" y2="'+(H-b)+'" stroke="var(--muted)" stroke-dasharray="3 4" stroke-width="1"></line>';
+    s+='<circle cx="'+X(rep)+'" cy="'+Y(w)+'" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"></circle>';
+    $('c-chart').innerHTML=s;
+  }
+  ids.forEach(function(i){$(i).addEventListener('input',draw)});
+  Array.prototype.forEach.call(document.querySelectorAll('.presets button'),function(bt){bt.addEventListener('click',function(){var p=bt.getAttribute('data-p').split(','); ids.forEach(function(i,k){$(i).value=p[k]}); draw()})});
+  draw();
+})();
+</script>
+</body>
+</html>
