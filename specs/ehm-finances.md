@@ -1,7 +1,7 @@
 # How finances work in Eastside Hockey Manager
 
 Draft v0.1, 19 November 2026. For database editors and players who want to know what the finance settings
-actually do. Written from tests on EHM 1.5.0 (build 1669120) with the TBL database.
+actually do. Written from tests on EHM 1.5.0 (build 1669120) with the Pivot database (pre-November release version).
 
 ## How to read this
 
@@ -101,7 +101,7 @@ Things that follow from that:
   nation's row is never reached.
 - A nation with only one row uses it for every league in that nation, top flight and third tier alike.
   Clubs then differ only through their own reputation.
-- **Tested:** the NCAA has its own row in the TBL database and does not fall back to the United States row.
+- **Tested:** the NCAA has its own row in the Pivot database and does not fall back to the United States row.
 
 ---
 
@@ -381,7 +381,7 @@ comfortably profitable when loaded as playable.
 | Disable Starting Financial Adjustments | Database balances and budgets are used as entered | The game sets starting balances and adjusts budgets |
 
 - **Tested:** the wage option works as described (section 8).
-- The financial option was left at its default in all our tests. The TBL database stores a cash balance of 0
+- The financial option was left at its default in all our tests. The Pivot database stores a cash balance of 0
   for every club, so ticking it would most likely start every club with nothing.
 
 ---
