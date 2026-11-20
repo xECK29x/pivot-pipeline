@@ -1,6 +1,6 @@
 # How finances work in Eastside Hockey Manager
 
-Draft v0.1, 19 November 2026. For database editors and players who want to know what the finance settings
+Version 0.2, 20 November 2026. For database editors and players who want to know what the finance settings
 actually do. Written from tests on EHM 1.5.0 (build 1669120) with the Pivot database (pre-November release version).
 
 ## How to read this
@@ -97,8 +97,9 @@ fits:
 
 Things that follow from that:
 
-- **A league row only wins if it sits above the nation rows in the table.** A league row added below its
-  nation's row is never reached.
+- **Tested: you do not need to worry about the order of rows in the Editor or the file.** When the game builds
+  a new world it re-orders the table itself: the default row first, then every league row, then the nation rows.
+  A league row therefore always beats its nation's row, wherever it sits in the database file.
 - A nation with only one row uses it for every league in that nation, top flight and third tier alike.
   Clubs then differ only through their own reputation.
 - **Tested:** the NCAA has its own row in the Pivot database and does not fall back to the United States row.
@@ -219,6 +220,8 @@ Notes:
   rises of 11% to 35% at profitable clubs, a 10% cut at clubs that finished in the red, and every Junior
   club go from 37,500 to 43,125.
 - **Budgets do not strictly limit AI clubs.** Clubs commonly run payrolls somewhat over budget.
+- **A league that loses money shrinks.** Where every club finished in the red, the game cut budgets by 10% at each
+  rollover, season after season. Once the league's income was fixed, budgets stopped moving.
 
 ---
 
@@ -235,8 +238,9 @@ Notes:
 - Tick "Disable Starting Wage Adjustments" if you want the database's salaries respected.
 - The option does nothing for players without a salary. If a league's players have none, most of them start
   on the minimum.
-- Even with the option ticked, a small number of salaries in a few leagues were still lowered by roughly
-  10%. The cause is not known.
+- **Tested:** even with the option ticked, a database salary above the league's maximum wage is cut on day
+  one. In our database that explained every remaining change: the leagues with salaries above their maximum
+  were the leagues where salaries dropped, in the same numbers.
 
 ### League limits
 
@@ -349,9 +353,23 @@ Set per league under Comp Rules, League Rules.
   known.
 - "Total prize money" is a separate pot divided by the prize money type. We have not tested it.
 
-**A caution.** Extra income raises the club's budget at the next rollover (section 7), and clubs then spend
+**Tested over two seasons.** We raised TV money in seven leagues whose clubs were losing money and followed
+each for two full seasons:
+
+| Outcome | Leagues | What happened |
+|---|---|---|
+| Fixed | 5 | Most or all clubs in profit in both seasons; budgets stable at the rollover |
+| Fixed on average, split underneath | 1 | The stronger clubs profit and the three weakest still lose, because all clubs carry similar wage bills |
+| Needed more than TV money | 1 | Clubs spent part of the increase; it also needed a lower league minimum wage |
+
+In the league that had been losing most consistently, every club was in the red after one season with no TV
+money and had its budget cut 10% a year. With a modest TV payment every club was profitable by the second
+season and budgets held steady.
+
+**A caution.** Extra income can raise the club's budget at the next rollover (section 7), and clubs then spend
 more. In one league the clubs spent about a quarter of a large TV increase on wages within the first season.
-Judge a change over two seasons, not one.
+Judge a change over two seasons, not one. A flat payment also helps rich and poor clubs alike, so it cannot
+fix a league where only the smallest clubs lose money.
 
 ---
 
@@ -396,7 +414,7 @@ comfortably profitable when loaded as playable.
 | A league's clubs lose money every year | Wages exceed what the league earns | League TV money; league minimum wage; then budgets |
 | Most players in a league earn the same low wage | They have no database salary, or the league minimum equals most asks | Player salaries; league minimum wage |
 | Stars on expiring deals start on huge wages | Starting wage adjustments are on | Tick Disable Starting Wage Adjustments |
-| A new league row has no effect | It sits below the nation row | Financial Info table order |
+| Some salaries drop on day one even with wage adjustments disabled | They are above the league's maximum wage | League transfer rules: max yearly wage |
 | A league looks bankrupt in a long save | It was a background league | Reload with the league playable before changing anything |
 
 When you change something, change one kind of setting at a time, check day one, then simulate at least one
@@ -411,7 +429,6 @@ full season with the league playable. Two seasons if you changed income.
 - How the game sets TV revenue for North American leagues.
 - What drives the "Other" income line.
 - Why a handful of NHL clubs take a very large arena charge late in the season.
-- Why a few database salaries are still lowered with wage adjustments disabled.
 - How far into the red a club must be before its board stops a human manager signing people.
 - Whether the Starting Financial Adjustments option keeps an authored budget through later seasons.
 
@@ -423,6 +440,7 @@ full season with the league playable. Two seasons if you changed income.
   were read on day one, monthly, and after each season rollover.
 - Club balances, budgets, contracts and finance lines were read directly from the save files and checked
   against the in-game finance and contract screens.
-- One ten-year save and one two-season save with many leagues playable supplied the long-run figures.
+- One ten-year save and three two-season saves with the leagues in question playable supplied the long-run
+  figures.
 - Statements labelled "From the game's code" come from reading the game's program logic for build 1669120.
   Other builds may differ.
