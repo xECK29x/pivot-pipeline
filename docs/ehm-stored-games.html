@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How Eastside Hockey Manager keeps the details of played games: what it stores, what it deletes oldest first, what it keeps elsewhere, and how a stored game's play-by-play is shown again.">
+<title>EHM Stored Games Explained</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#f2f5f7; --surface:#ffffff; --ink:#15222c; --muted:#55636e; --line:#d5dde3; --accent:#0a6a8f; --accent-soft:#e2f0f6;
+  --ok:#1f6b45; --ok-bg:#dff1e6; --code:#7a5200; --code-bg:#f8ebcc; --unk:#5a4a7d; --unk-bg:#e9e3f4;
+  --font-display:"Space Grotesk","Segoe UI",system-ui,sans-serif; --font-body:"Inter","Segoe UI",system-ui,sans-serif; --font-data:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f171d; --surface:#17222a; --ink:#e4ebf0; --muted:#9aa9b4; --line:#2b3a45; --accent:#5cc0e6; --accent-soft:#16303c;
+  --ok:#7fd3a3; --ok-bg:#173326; --code:#ecc46a; --code-bg:#3a2e12; --unk:#c1b0ea; --unk-bg:#2a2340; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f171d; --surface:#17222a; --ink:#e4ebf0; --muted:#9aa9b4; --line:#2b3a45; --accent:#5cc0e6; --accent-soft:#16303c;
+  --ok:#7fd3a3; --ok-bg:#173326; --code:#ecc46a; --code-bg:#3a2e12; --unk:#c1b0ea; --unk-bg:#2a2340; color-scheme:dark }
+html{-webkit-text-size-adjust:100%}*,*::before,*::after{box-sizing:border-box}img{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+.page{max-width:54rem;margin:0 auto;padding-block:2.5rem 4rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:1rem}
+.page>*{min-width:0;margin:0}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.15;text-wrap:balance}
+.lede{color:var(--muted);max-width:65ch}
+h2{font-family:var(--font-display);font-weight:600;font-size:1.45rem;line-height:1.25;text-wrap:balance;padding-top:1.6rem;border-top:1px solid var(--line);margin-top:1.2rem}
+h3{font-family:var(--font-display);font-weight:600;font-size:1.1rem;margin-top:.6rem}
+p,li{max-width:68ch}
+ul,ol{padding-left:1.3rem;display:flex;flex-direction:column;gap:.35rem}
+a{color:var(--accent)} a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1rem 1.2rem}
+.toc h2{border:0;padding:0;margin:0 0 .5rem;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--font-body);font-weight:600}
+.toc ol{columns:2;column-gap:2rem;display:block}.toc li{margin-bottom:.25rem;break-inside:avoid}
+@media (max-width:560px){.toc ol{columns:1}}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;vertical-align:top;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);font-size:.8rem;letter-spacing:.03em;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:.08rem .5rem;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.code{background:var(--code-bg);color:var(--code)}.pill.unk{background:var(--unk-bg);color:var(--unk)}
+.formula{background:var(--accent-soft);border-left:3px solid var(--accent);padding:.8rem 1rem;font-family:var(--font-data);font-size:.92rem;max-width:none;overflow-wrap:anywhere}
+.calc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1.2rem;display:flex;flex-direction:column;gap:.9rem;margin-top:.6rem}
+.calc>*{margin:0;min-width:0}.calc h3{margin:0}
+.calc-note{color:var(--muted);font-size:.92rem}
+.presets{display:flex;flex-wrap:wrap;gap:.5rem}
+.presets button{font:inherit;font-size:.85rem;padding:.35rem .7rem;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);cursor:pointer}
+.presets button:hover{border-color:var(--accent)}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.8rem}
+.calc-grid label{display:flex;flex-direction:column;gap:.3rem;font-size:.82rem;color:var(--muted);font-weight:500}
+.calc-grid input{font:inherit;font-family:var(--font-data);font-size:1rem;padding:.5rem .6rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.calc-out{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem;max-width:none}
+.calc-k{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#c-out{font-family:var(--font-display);font-size:2rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.calc-sub{color:var(--muted);font-size:.9rem}
+.chart-wrap{overflow-x:auto}#c-chart{width:100%;min-width:320px;height:auto;display:block}
+.foot{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:1rem;margin-top:1.5rem}
+
+.quote{margin:0;border-left:3px solid var(--line);padding:.6rem 1rem;color:var(--muted);background:var(--surface);border-radius:0 6px 6px 0;max-width:68ch}
+.sheet input,.sheet select{font:inherit;font-size:.9rem;padding:.35rem .45rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;min-width:7rem;box-sizing:border-box}
+.sheet input[type=number]{font-family:var(--font-data)}
+.sheet td{vertical-align:middle}
+.sheet .num{font-family:var(--font-data);white-space:nowrap}
+.sheet button,.addrow{font:inherit;font-size:.85rem;padding:.35rem .7rem;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);cursor:pointer}
+.sheet button:hover,.addrow:hover{border-color:var(--accent)}
+.results{display:flex;flex-direction:column;gap:.4rem}
+.big{font-family:var(--font-display);font-size:1.6rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.over{color:#b3261e}
+:root[data-theme="dark"] .over{color:#ff8a80}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .over{color:#ff8a80}}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tw{position:relative}
+.sheet select{min-width:10.5rem}
+.sheet th,.sheet td{padding:.45rem .35rem}
+.sheet input[type=text]{min-width:6.5rem}
+.sheet input[type=number]{min-width:6.5rem}
+
+</style>
+</head>
+<body>
+<main class="page">
+<h1>What EHM keeps from the games you play</h1>
+<p class="lede"><em>Version 1.0, 20 November 2026. Tested on EHM 1.5.0 (build 1669120) with a custom online database. How the game keeps games is the same in every database; how far back it reaches depends on how many leagues you load and how busy they are.</em></p>
+<nav class="toc" aria-label="Contents"><h2>Contents</h2><ol><li><a href="#s-how-to-read-this">How to read this</a></li><li><a href="#s-1-the-short-version">The short version</a></li><li><a href="#s-2-stored-games-are-kept-by-priority">Stored games are kept by priority</a></li><li><a href="#s-3-the-limit-is-space-not-a-number-of-games">The limit is space, not a number of games</a></li><li><a href="#s-4-season-totals-do-not-come-from-stored-games">Season totals do not come from stored games</a></li><li><a href="#s-5-games-without-play-by-play">Games without play-by-play</a></li><li><a href="#s-6-the-play-by-play-of-a-stored-game">The play-by-play of a stored game</a></li><li><a href="#s-what-i-left-out-on-purpose">What I left out on purpose</a></li></ol></nav>
+<p>This page describes how Eastside Hockey Manager keeps the details of games once they are played: what it stores, what it deletes, what it keeps elsewhere, and how a stored game's play-by-play is shown again.</p>
+<h2 id="s-how-to-read-this">How to read this</h2>
+<p>Every statement carries one label.</p>
+<div class="tw"><table><thead><tr><th>Label</th><th>Meaning</th></tr></thead><tbody><tr><td><strong>Tested</strong></td><td>We checked it against what the game stored and showed on its own screens.</td></tr><tr><td><strong>From the game's code</strong></td><td>Read from the game's program logic. It has not been separately confirmed in game.</td></tr><tr><td><strong>Not known</strong></td><td>We could not settle it. Where we have a reading, it is given as a reading, not a fact.</td></tr></tbody></table></div>
+<p>Where the game's developer has confirmed a point, the page says "confirmed by the developer".</p>
+<h2 id="s-1-the-short-version">1. The short version</h2>
+<ul><li><strong>The game keeps the detail of recent games only.</strong> Box scores, game reports and play-by-play for a game are stored when it is played. Older ones are deleted as new games come in.</li><li><strong>Your league's games are kept longer than other leagues'</strong>, and the oldest are deleted first. <span class="pill ok">Tested</span> The developer has also confirmed that your own club's games are kept longest of all.</li><li><strong>The limit is storage space, not a number of games.</strong> The "Games Stored" setting did not decide how much was kept in our tests.</li><li><strong>Season totals are not affected.</strong> Player and club season statistics are kept separately and stay complete when the game details are gone.</li><li><strong>A stored game's play-by-play follows a fixed script.</strong> Reopen it and the same events happen at the same times; only the wording of the lines changes.</li></ul>
+<h2 id="s-2-stored-games-are-kept-by-priority">2. Stored games are kept by priority</h2>
+<p><span class="pill ok">Tested</span></p>
+<p>The game keeps stored games in separate stores:</p>
+<div class="tw"><table><thead><tr><th>Store</th><th>What it holds</th><th>How it is kept</th></tr></thead><tbody><tr><td>Your league</td><td>the games in your own league, your club's included</td><td>kept longest of the league stores</td></tr><tr><td>Other loaded leagues</td><td>games in the other leagues you loaded</td><td>kept least</td></tr><tr><td>Tournaments and internationals</td><td>tournament and international games</td><td>kept a long time, in less detail</td></tr></tbody></table></div>
+<ul><li><strong>Your own club's games are kept longest of all</strong>, ahead of the rest of your league. That is confirmed by the developer; our count did not separate them from your league's other games.</li></ul>
+<ul><li><strong>When a store is full, its oldest games are deleted first.</strong> We counted every stored game in one save. Each league's games ran unbroken back to a cut-off date, with nothing missing in between.</li><li><strong>The order is predictable.</strong> From what was stored, we predicted exactly which games would survive on a day that was only partly deleted, and the game's screen matched.</li></ul>
+<p><strong>How far back each store reached, in the save we measured:</strong></p>
+<div class="tw"><table><thead><tr><th>Store</th><th>Reached back about</th></tr></thead><tbody><tr><td>Your league</td><td>200 days</td></tr><tr><td>Other loaded leagues</td><td>115 days</td></tr><tr><td>Tournaments and internationals</td><td>years</td></tr></tbody></table></div>
+<p>These depths are from one save. They will differ with how many leagues you load and how many games they play.</p>
+<h2 id="s-3-the-limit-is-space-not-a-number-of-games">3. The limit is space, not a number of games</h2>
+<p><span class="pill ok">Tested</span></p>
+<ul><li><strong>The "Games Stored" setting did not limit what was kept</strong> in our tests: the stores filled up long before the number it was set to. What the setting does when it is set lower is <strong>Not known</strong>.</li><li><strong>What runs out is storage space in each store.</strong></li><li><strong>Not known, our reading:</strong> loading more leagues, or busier ones, would fill a shared store faster, so each league's games would reach back less far. We did not test this directly.</li></ul>
+<h2 id="s-4-season-totals-do-not-come-from-stored-games">4. Season totals do not come from stored games</h2>
+<p><span class="pill ok">Tested</span></p>
+<ul><li><strong>Players' and clubs' season statistics are kept separately</strong> from the stored game details.</li><li><strong>An example from our test:</strong> a player who had played every game of an 82-game season had only 63 of those games still stored, yet his season totals showed all 82 correctly.</li><li><strong>So losing old game details does not change anyone's statistics.</strong></li></ul>
+<h2 id="s-5-games-without-play-by-play">5. Games without play-by-play</h2>
+<p><span class="pill ok">Tested</span></p>
+<ul><li><strong>Some games are stored with less detail.</strong> These are mostly games the game simulated quickly, outside the leagues you chose to load in detail. Only a small share of the games in your loaded leagues are like this.</li><li><strong>For these games the game offers no play-by-play:</strong> "There is no play-by-play available."</li><li><strong>Not known:</strong> exactly which leagues and games are stored in less detail beyond that pattern.</li></ul>
+<h2 id="s-6-the-play-by-play-of-a-stored-game">6. The play-by-play of a stored game</h2>
+<ul><li><strong>It follows a fixed script.</strong> <span class="pill ok">Tested</span> We opened the same stored game five times, three in one session and two more after restarting the game. All 32 timed events came back at the same times, in the same order, every time.</li><li><strong>The wording changes.</strong> About three lines in four were worded differently from one viewing to the next, while the events they described stayed the same.</li><li><strong>It is re-created when you open the game.</strong> The game re-creates a stored game's play-by-play by re-running the game when you open it. Confirmed by the developer, for games played on the current match engine.</li><li><strong>Games stored in less detail have no play-by-play to show</strong> (section 5).</li></ul>
+<h2 id="s-what-i-left-out-on-purpose">What I left out on purpose</h2>
+<ul><li><strong>Storage sizes and counts.</strong> The page says how the limit behaves, not how big it is.</li><li><strong>How any of this was measured,</strong> and the names of the game's internal files.</li><li><strong>Advice.</strong> The page reports what the game does; it does not tell you what to do about it.</li><li><strong>The clubs and players we tested on.</strong></li></ul>
+<p class="foot">Version 1.0, 20 November 2026. Statements labelled "From the game's code" were read from the game's program logic for build 1669120 and may differ in other builds. Every setting named here is a game or database setting.</p>
+</main>
+</body>
+</html>
