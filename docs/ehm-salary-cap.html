@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Which players count against the salary cap in Eastside Hockey Manager, how the Finances page works it out, why the two disagree with buried contracts, and a cap sheet calculator.">
+<title>EHM Salary Cap Explained</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#f2f5f7; --surface:#ffffff; --ink:#15222c; --muted:#55636e; --line:#d5dde3; --accent:#0a6a8f; --accent-soft:#e2f0f6;
+  --ok:#1f6b45; --ok-bg:#dff1e6; --code:#7a5200; --code-bg:#f8ebcc; --unk:#5a4a7d; --unk-bg:#e9e3f4;
+  --font-display:"Space Grotesk","Segoe UI",system-ui,sans-serif; --font-body:"Inter","Segoe UI",system-ui,sans-serif; --font-data:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f171d; --surface:#17222a; --ink:#e4ebf0; --muted:#9aa9b4; --line:#2b3a45; --accent:#5cc0e6; --accent-soft:#16303c;
+  --ok:#7fd3a3; --ok-bg:#173326; --code:#ecc46a; --code-bg:#3a2e12; --unk:#c1b0ea; --unk-bg:#2a2340; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f171d; --surface:#17222a; --ink:#e4ebf0; --muted:#9aa9b4; --line:#2b3a45; --accent:#5cc0e6; --accent-soft:#16303c;
+  --ok:#7fd3a3; --ok-bg:#173326; --code:#ecc46a; --code-bg:#3a2e12; --unk:#c1b0ea; --unk-bg:#2a2340; color-scheme:dark }
+html{-webkit-text-size-adjust:100%}*,*::before,*::after{box-sizing:border-box}img{max-width:100%}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+.page{max-width:54rem;margin:0 auto;padding-block:2.5rem 4rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:1rem}
+.page>*{min-width:0;margin:0}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.15;text-wrap:balance}
+.lede{color:var(--muted);max-width:65ch}
+h2{font-family:var(--font-display);font-weight:600;font-size:1.45rem;line-height:1.25;text-wrap:balance;padding-top:1.6rem;border-top:1px solid var(--line);margin-top:1.2rem}
+h3{font-family:var(--font-display);font-weight:600;font-size:1.1rem;margin-top:.6rem}
+p,li{max-width:68ch}
+ul,ol{padding-left:1.3rem;display:flex;flex-direction:column;gap:.35rem}
+a{color:var(--accent)} a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1rem 1.2rem}
+.toc h2{border:0;padding:0;margin:0 0 .5rem;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--font-body);font-weight:600}
+.toc ol{columns:2;column-gap:2rem;display:block}.toc li{margin-bottom:.25rem;break-inside:avoid}
+@media (max-width:560px){.toc ol{columns:1}}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;vertical-align:top;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);font-size:.8rem;letter-spacing:.03em;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:.08rem .5rem;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.code{background:var(--code-bg);color:var(--code)}.pill.unk{background:var(--unk-bg);color:var(--unk)}
+.formula{background:var(--accent-soft);border-left:3px solid var(--accent);padding:.8rem 1rem;font-family:var(--font-data);font-size:.92rem;max-width:none;overflow-wrap:anywhere}
+.calc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1.2rem;display:flex;flex-direction:column;gap:.9rem;margin-top:.6rem}
+.calc>*{margin:0;min-width:0}.calc h3{margin:0}
+.calc-note{color:var(--muted);font-size:.92rem}
+.presets{display:flex;flex-wrap:wrap;gap:.5rem}
+.presets button{font:inherit;font-size:.85rem;padding:.35rem .7rem;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);cursor:pointer}
+.presets button:hover{border-color:var(--accent)}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.8rem}
+.calc-grid label{display:flex;flex-direction:column;gap:.3rem;font-size:.82rem;color:var(--muted);font-weight:500}
+.calc-grid input{font:inherit;font-family:var(--font-data);font-size:1rem;padding:.5rem .6rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.calc-out{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem;max-width:none}
+.calc-k{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#c-out{font-family:var(--font-display);font-size:2rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.calc-sub{color:var(--muted);font-size:.9rem}
+.chart-wrap{overflow-x:auto}#c-chart{width:100%;min-width:320px;height:auto;display:block}
+.foot{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:1rem;margin-top:1.5rem}
+
+.quote{margin:0;border-left:3px solid var(--line);padding:.6rem 1rem;color:var(--muted);background:var(--surface);border-radius:0 6px 6px 0;max-width:68ch}
+.sheet input,.sheet select{font:inherit;font-size:.9rem;padding:.35rem .45rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;min-width:7rem;box-sizing:border-box}
+.sheet input[type=number]{font-family:var(--font-data)}
+.sheet td{vertical-align:middle}
+.sheet .num{font-family:var(--font-data);white-space:nowrap}
+.sheet button,.addrow{font:inherit;font-size:.85rem;padding:.35rem .7rem;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);cursor:pointer}
+.sheet button:hover,.addrow:hover{border-color:var(--accent)}
+.results{display:flex;flex-direction:column;gap:.4rem}
+.big{font-family:var(--font-display);font-size:1.6rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.over{color:#b3261e}
+:root[data-theme="dark"] .over{color:#ff8a80}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .over{color:#ff8a80}}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tw{position:relative}
+.sheet select{min-width:10.5rem}
+.sheet th,.sheet td{padding:.45rem .35rem}
+.sheet input[type=text]{min-width:6.5rem}
+.sheet input[type=number]{min-width:6.5rem}
+
+</style>
+</head>
+<body>
+<main class="page">
+<h1>How EHM counts the salary cap</h1>
+<p class="lede"><em>Version 1.0, 20 November 2026. Tested on EHM 1.5.0 (build 1669120) with a test copy of the Pivot database, re-checked on a custom online database. Every setting named here is a database value; your database may set it differently.</em></p>
+<nav class="toc" aria-label="Contents"><h2>Contents</h2><ol><li><a href="#s-how-to-read-this">How to read this</a></li><li><a href="#s-1-the-short-version">The short version</a></li><li><a href="#s-2-where-the-settings-are">Where the settings are</a></li><li><a href="#s-3-who-counts-against-the-cap">Who counts against the cap</a></li><li><a href="#s-4-buried-contracts">Buried contracts</a></li><li><a href="#s-5-injured-players-ir">Injured players: IR</a></li><li><a href="#s-6-cap-penalties">Cap penalties</a></li><li><a href="#s-7-the-money-on-the-finances-page">The money on the Finances page</a></li><li><a href="#s-8-what-your-board-lets-you-offer">What your board lets you offer</a></li><li><a href="#s-9-keep-your-own-cap-sheet">Keep your own cap sheet</a></li><li><a href="#s-10-is-the-cap-bugged">&quot;Is the cap bugged?&quot;</a></li><li><a href="#s-11-ehm-compared-with-the-real-nhl">EHM compared with the real NHL</a></li><li><a href="#s-what-i-left-out-on-purpose">What I left out on purpose</a></li></ol></nav>
+<p>This page explains which players count against a club's salary cap in Eastside Hockey Manager, how the game works out the money on the Finances page, and why you should keep your own cap sheet if your club carries buried contracts.</p>
+<h2 id="s-how-to-read-this">How to read this</h2>
+<p>Every statement carries one label.</p>
+<div class="tw"><table><thead><tr><th>Label</th><th>Meaning</th></tr></thead><tbody><tr><td><strong>Tested</strong></td><td>We checked it on a running game against the game's own screens and figures.</td></tr><tr><td><strong>From the game's code</strong></td><td>Read from the game's program logic. It has not been separately confirmed in game.</td></tr><tr><td><strong>Not known</strong></td><td>We could not settle it. Where we have a reading, it is given as a reading, not a fact.</td></tr><tr><td><strong>Comparison</strong></td><td>Taken from outside the game (the real NHL CBA), for comparison only.</td></tr></tbody></table></div>
+<p><strong>Two kinds of fact appear here:</strong></p>
+<ul><li><strong>How the game counts:</strong> its own behaviour, the same in every database.</li><li><strong>The numbers it counts with:</strong> set by the database you play. They appear below as named settings, never as values to copy.</li></ul>
+<h2 id="s-1-the-short-version">1. The short version</h2>
+<ul><li><strong>The Salary Cap Chart and the Finances page do not agree.</strong></li><li>The chart's Counts column counts a buried contract's excess over the farm limit.</li><li>The Finances totals ("Salaries left to pay", "Averaged Club Salary") leave buried players out entirely.</li><li>The contract offer screen quotes the Averaged Club Salary when it tells you how much your board will allow.</li><li><span class="pill ok">Tested</span></li><li><strong>If your club carries buried contracts, the game's money total understates what the chart says counts.</strong> Keep your own sheet. The calculator on the web version of this page does it for you.</li><li><strong>Injured players on IR stop counting.</strong> The AI places injured players on IR itself; a human manager must do it.</li><li><strong>In the offseason window only the top 23 players by current weekly wage count.</strong></li></ul>
+<h2 id="s-2-where-the-settings-are">2. Where the settings are</h2>
+<p>All of these are in the Editor, on the league's transfer rules or its extra rules.</p>
+<div class="tw"><table><thead><tr><th>Setting (Editor name)</th><th>What it does</th></tr></thead><tbody><tr><td>Salary cap</td><td>The cap. The chart and the Finances page compare against it.</td></tr><tr><td>Salary floor</td><td>The floor.</td></tr><tr><td>Salary cap farmed wage max yearly limit (extra rule 121)</td><td>The <strong>farm limit</strong>: how much of a buried one-way contract is forgiven (section 4).</td></tr><tr><td>Salary cap offseason start day / end day (extra rules 30 and 31)</td><td>The <strong>offseason window</strong>, when only the top 23 count (section 3).</td></tr><tr><td>Long term IR min days</td><td>How long an injury must be before the AI places the player on IR. A league that leaves it at 0 uses 24 days. The Editor also shows Short term and Medium term IR min days; this test does not use them.</td></tr><tr><td>Contract buyout bracket 1 / 2 age limit, … percentage cap hit, … apply salary adjustment on cap hit, … cap hit years multiplier (extra rules 149 to 154)</td><td>Feed the buyout-shaped cap penalty (section 6). Each is a value the database sets; how they combine is not known.</td></tr><tr><td>Player budget (each club)</td><td>The club's wage budget. The contract offer screen shows it beside the cap.</td></tr></tbody></table></div>
+<h2 id="s-3-who-counts-against-the-cap">3. Who counts against the cap</h2>
+<p>The Salary Cap Chart's <strong>Counts</strong> column shows, for each contracted player, whether he counts and why.</p>
+<div class="tw"><table><thead><tr><th>Label</th><th>Means</th><th>Counts?</th></tr></thead><tbody><tr><td><strong>RP</strong></td><td>Roster Player</td><td>yes</td></tr><tr><td><strong>BC</strong></td><td>Buried Contract: in the minors on a one-way deal above the farm limit</td><td>only the part above the limit, on the chart (section 4)</td></tr><tr><td><strong>N/R</strong></td><td>Not on roster</td><td>no</td></tr><tr><td><strong>IR</strong></td><td>Injured Reserve</td><td>no (section 5)</td></tr><tr><td><strong>OFF</strong></td><td>outside the top 23 in the offseason window</td><td>no</td></tr><tr><td><strong>TC / LC</strong></td><td>trial or loan contract</td><td>no</td></tr><tr><td><strong>WVR</strong></td><td>on waivers</td><td><strong>Not known</strong></td></tr></tbody></table></div>
+<p><strong>Outside the offseason window, the game decides in this order.</strong> <strong>Tested</strong> on every row of seven clubs' charts.</p>
+<ol><li>A contract with no cap hit doesn't count. Trial and loan contracts land here.</li><li>A player <strong>on IR</strong> doesn't count.</li><li>A player <strong>playing for the club that holds his contract</strong> counts (RP).</li><li>A player <strong>in the minors on a one-way contract</strong> whose cap hit is above the farm limit counts as <strong>BC</strong>.</li><li>Anyone else doesn't count (N/R).</li></ol>
+<p><strong>Inside the offseason window,</strong> only the <strong>top 23 players by current weekly wage</strong> count. <strong>Tested</strong> on every row of three clubs' charts.</p>
+<ul><li><strong>The sort:</strong></li><li>the club's players by current weekly wage, highest first;</li><li>ties by full name, A to Z, then by the player's place in the database;</li><li>the order is fixed, not random.</li><li><strong>The count:</strong> the first 23 are RP; the rest are <strong>OFF</strong>.</li><li><strong>Not cap hit:</strong> the list is sorted by weekly wage, so on the chart an OFF player can sit above an RP player.</li><li><strong>Goalies:</strong> there is no separate count for skaters and goalies.</li></ul>
+<h2 id="s-4-buried-contracts">4. Buried contracts</h2>
+<p><strong>On the chart (Tested).</strong></p>
+<ul><li><strong>The rule:</strong> while the league's season is under way, a player in the minors on a <strong>one-way</strong> contract counts only the part of his cap hit above the farm limit:</li><li>counted per week = cap hit per week − (farm limit ÷ 52, rounded down), never below 0.</li><li><strong>The two figures:</strong> the chart shows the reduced amount first, the full one in brackets. For example, a $6,000,000 contract with a farm limit of $1,200,000 shows "$4,800,000 ($6,000,000)".</li><li><strong>Two-way contracts:</strong> a player in the minors on a two-way contract shows $0.</li><li><strong>Below the limit:</strong> so does a one-way player whose cap hit is below the farm limit.</li></ul>
+<p><strong>On the Finances page (Tested).</strong></p>
+<ul><li><strong>No buried amount at all:</strong> "Salaries left to pay" counts only the players playing for the club. "Averaged Club Salary" is built from it, so it carries no buried amount either.</li><li><strong>So the game shows two cap positions</strong> whenever a club carries buried contracts:</li><li>the chart's, with the buried excess;</li><li>the Finances page's, without it.</li></ul>
+<p><strong>What the game enforces: Not known.</strong></p>
+<ul><li>When you make an offer, the offer screen quotes the Averaged Club Salary, the total without buried players (section 8).</li><li>Whether the board's limit itself takes buried contracts into account is not known.</li></ul>
+<p><strong>After the season:</strong> whether a farmed one-way player counts in full once the season is over is <strong>Not known</strong>. On a date during the playoffs he still showed the reduced figure.</p>
+<h2 id="s-5-injured-players-ir">5. Injured players: IR</h2>
+<p><span class="pill ok">Tested</span></p>
+<ul><li><strong>A player on IR stops counting.</strong> His cap hit stays on the chart, marked IR, but the club's figures leave him out, this season and next.</li><li><strong>What puts a player on IR:</strong></li><li><strong>An AI-run club:</strong> the player is on IR if his current injury is at least the league's "Long term IR min days", or he is on the IR list. The AI places long-injured players on IR itself.</li><li><strong>A human-run club:</strong> only the IR list counts, so the manager must place him.</li><li>We saw the same injured player show IR under the AI and BC the moment a human manager took the club over.</li><li><strong>No long-term tier:</strong> EHM's relief comes from IR itself. There is no separate long-term status and no "exceed the cap" step.</li></ul>
+<h2 id="s-6-cap-penalties">6. Cap penalties</h2>
+<ul><li><strong>The Finances page shows each penalty as its weekly amount × 52,</strong> rounded like every other figure. It counts in every season up to its last one. <strong>Tested</strong> on four clubs.</li><li><strong>The game can create a penalty three ways.</strong> <span class="pill code">From the game's code</span></li><li><strong>one is shaped like a buyout,</strong> using the contract's remaining wages and years and the contract buyout rules (section 2);</li><li><strong>one records half a season's cap hit</strong> until the contract ends;</li><li><strong>one takes its amount from elsewhere.</strong></li><li><strong>What triggers each, and the buyout formula: Not known.</strong></li></ul>
+<h2 id="s-7-the-money-on-the-finances-page">7. The money on the Finances page</h2>
+<p><span class="pill ok">Tested</span></p>
+<div class="tw"><table><thead><tr><th>Line</th><th>What it is</th></tr></thead><tbody><tr><td><strong>Salaries paid out</strong></td><td>what the club has paid this season so far</td></tr><tr><td><strong>Salaries left to pay</strong></td><td>the cap hits of the players playing for the club (IR left out) × 52, scaled by the share of the season left. Next season's column uses the full season</td></tr><tr><td><strong>Cap penalties</strong></td><td>section 6</td></tr><tr><td><strong>Salary Cap (p/a)</strong></td><td>the league's cap</td></tr><tr><td><strong>Averaged Club Salary (p/a)</strong></td><td>paid out + left to pay + penalties. Shown as "Est." during the offseason window</td></tr></tbody></table></div>
+<p><strong>Rounding.</strong> Figures are rounded to the <strong>nearest</strong> step (halves up), and the step depends on the size:</p>
+<div class="tw"><table><thead><tr><th>Amount up to</th><th>Rounds to the nearest</th></tr></thead><tbody><tr><td>$10,000,000</td><td>$1,000</td></tr><tr><td>$100,000,000</td><td>$5,000</td></tr><tr><td>above</td><td>$10,000</td></tr></tbody></table></div>
+<ul><li><strong>An example:</strong> $108,507,256 shows as $108,510,000.</li><li><strong>Small amounts use smaller steps.</strong></li></ul>
+<p><strong>Why two screens can disagree.</strong></p>
+<ul><li><strong>The page works out its own figures</strong> from the current roster each time it is shown.</li><li><strong>The game also keeps a stored payroll,</strong> and opening the page does not reliably update it. We saw the stored figure out of date while the page was right.</li><li><strong>If a number elsewhere disagrees with the Finances page, trust the page,</strong> and remember that the page leaves buried players out.</li></ul>
+<p>Club wage budgets are covered in <a href="ehm-finances.html">How finances work in Eastside Hockey Manager</a>.</p>
+<h2 id="s-8-what-your-board-lets-you-offer">8. What your board lets you offer</h2>
+<p>The contract offer screen says, for example:</p>
+<blockquote class="quote">Your board will allow a salary up to $9,000,000 (p/a) for this contract.<br>The current Averaged Club Salary is $87.5M (p/a), while the player budget is $109M (p/a) and the cap is at $104M (p/a).</blockquote>
+<ul><li><strong>The cap total it quotes is the Averaged Club Salary,</strong> rounded down: the total that leaves buried players out. <span class="pill ok">Tested</span></li><li><strong>The board's limit is not simply your cap room.</strong> It depends on the role you offer (a Core role allowed far more than a Fringe one) and on the club. <strong>Tested</strong> on two clubs.</li><li>For the same three players and roles, the club with less cap room and a different reputation was allowed less at every role.</li><li>The finance guide traces the board's limit to the club's reputation. How cap position enters is <strong>Not known</strong>.</li></ul>
+<h2 id="s-9-keep-your-own-cap-sheet">9. Keep your own cap sheet</h2>
+<p>Online leagues often keep a cap sheet outside the game. These findings show why: a club with buried contracts sees two different cap positions, and the game's money figures quote the lower one.</p>
+<p>A sheet that matches the chart needs, per player:</p>
+<ul><li>the cap hit;</li><li>where he plays: with the club, in the minors on a one-way deal, in the minors on a two-way deal, or on IR.</li></ul>
+<p>Then:</p>
+<ul><li><strong>the chart's count</strong> = roster cap hits + (each buried one-way cap hit above the farm limit − the farm limit) + penalties;</li><li><strong>the game's money total</strong> = roster cap hits (IR out) + penalties, over a full season;</li><li><strong>cap room</strong> = the cap − whichever total your league uses.</li></ul>
+<p>The calculator below does this.</p>
+<section class="calc" aria-labelledby="k-h">
+<h3 id="k-h">Cap sheet calculator</h3>
+<p class="calc-note">Enter your league's settings and your contracted players. The calculator applies the chart's rule and the Finances page's rule over a full season, side by side. Nothing you type leaves this page or is stored.</p>
+<div class="presets" role="group" aria-label="Examples">
+<button type="button" id="k-example">Load an example club</button>
+<button type="button" id="k-clear">Clear the players</button>
+</div>
+<div class="calc-grid">
+<label for="k-cap">Salary cap (p/a)<input id="k-cap" type="number" inputmode="numeric" min="0" step="100000" value="100000000"></label>
+<label for="k-farm">Farm limit, extra rule 121 (p/a)<input id="k-farm" type="number" inputmode="numeric" min="0" step="25000" value="1200000"></label>
+<label for="k-pen">Cap penalties this season (p/a)<input id="k-pen" type="number" inputmode="numeric" min="0" step="10000" value="0"></label>
+</div>
+<div class="tw"><table class="sheet"><thead><tr><th>Player</th><th>Cap hit (p/a)</th><th>Where he plays</th><th>Chart counts</th><th>Finances counts</th><th><span class="vh">Remove</span></th></tr></thead><tbody id="k-rows"></tbody></table></div>
+<div><button type="button" class="addrow" id="k-add">Add a player</button></div>
+<div class="results">
+<p class="calc-out"><span class="calc-k">Chart's count</span> <output id="k-chart" class="big">–</output> <span class="calc-sub" id="k-chart-room"></span></p>
+<p class="calc-out"><span class="calc-k">Finances total</span> <output id="k-fin" class="big">–</output> <span class="calc-sub" id="k-fin-room"></span></p>
+<p class="calc-note" id="k-gap"></p>
+</div>
+<p class="calc-note">Full-season view: during the season the game blends what has been paid with what is left to pay, and works in weekly amounts, so its figures can differ from these by small amounts. Trial and loan contracts and players on waivers are not modelled.</p>
+</section>
+
+<h2 id="s-10-is-the-cap-bugged">10. "Is the cap bugged?"</h2>
+<p><strong>The verdicts follow one rule:</strong></p>
+<ul><li><strong>GAME BUG:</strong> the game contradicts its own rules or figures.</li><li><strong>WORKS AS DESIGNED:</strong> consistent with itself, even where it differs from the real NHL.</li><li><strong>UNPROVEN:</strong> not settled, including where two of the game's own screens disagree.</li></ul>
+<div class="tw"><table><thead><tr><th>Claim</th><th>Verdict</th><th>Why</th></tr></thead><tbody><tr><td>"Buried players count their full salary"</td><td><strong>UNPROVEN</strong></td><td>The chart counts only the part above the farm limit; the Finances totals count none of it (section 4)</td></tr><tr><td>"The cap screen shows my real cap position"</td><td><strong>UNPROVEN</strong></td><td>With buried contracts, the chart and the Finances page give different totals; the offer screen quotes the Finances one</td></tr><tr><td>"Injured players still count against my cap"</td><td><strong>WORKS AS DESIGNED</strong></td><td>IR players leave the club's figures; the chart still shows their cap hit (section 5)</td></tr><tr><td>"My injured player isn't on IR"</td><td><strong>WORKS AS DESIGNED</strong></td><td>On a human-run club you must place him; the AI does it only for its own clubs</td></tr><tr><td>"In the offseason the game ignores some of my players"</td><td><strong>WORKS AS DESIGNED</strong></td><td>Only the top 23 by weekly wage count (section 3)</td></tr><tr><td>"The 23rd player in the offseason is picked at random"</td><td><strong>WORKS AS DESIGNED</strong></td><td>Ties break by full name, then database order</td></tr><tr><td>"Cap figures are rounded oddly"</td><td><strong>WORKS AS DESIGNED</strong></td><td>Size-based rounding (section 7)</td></tr><tr><td>"The Finances numbers changed when I opened the page"</td><td><strong>WORKS AS DESIGNED</strong></td><td>The page works out its own figures from the current roster</td></tr><tr><td>"A two-way player sent down counts nothing"</td><td><strong>WORKS AS DESIGNED</strong></td><td>That is the game's rule during the season</td></tr><tr><td>"Buyouts don't affect the cap"</td><td><strong>UNPROVEN</strong></td><td>A buyout-shaped penalty exists in the code; its trigger is not known</td></tr><tr><td>"You can't retain salary in a trade"</td><td><strong>WORKS AS DESIGNED</strong></td><td>The Editor has a "Retain salary in trades" setting, but the game never implemented it (confirmed by the developer)</td></tr></tbody></table></div>
+<h2 id="s-11-ehm-compared-with-the-real-nhl">11. EHM compared with the real NHL</h2>
+<p>This is a comparison, not a list of bugs. The real-NHL column describes the current NHL–NHLPA Collective Bargaining Agreement in broad terms, from outside the game; it is not quoted and gives no figures. Check the agreement's text before quoting it.</p>
+<div class="tw"><table><thead><tr><th>Topic</th><th>Real NHL (CBA)</th><th>EHM</th><th>Can EHM do it?</th></tr></thead><tbody><tr><td><strong>Buried contracts</strong></td><td>A player in the minors frees a set amount of his cap hit; the rest counts</td><td>The chart counts the part above the farm limit; the Finances totals count none of it</td><td><strong>Partly:</strong> the chart follows the idea; the money figures do not</td></tr><tr><td><strong>Injured players</strong></td><td>Regular IR gives no cap relief. LTIR lets a team exceed the cap by the injured player's cap hit</td><td>Any IR placement takes the player out of the club's figures</td><td><strong>No LTIR:</strong> IR itself is the relief; there is no "exceed the cap" step</td></tr><tr><td><strong>Offseason</strong></td><td>All contracts count; teams may exceed the cap by a set margin</td><td>Only the top 23 by weekly wage count during the window</td><td><strong>No overage margin</strong></td></tr><tr><td><strong>Buyouts</strong></td><td>A share of the remaining salary, spread over twice the remaining years</td><td>A buyout-shaped penalty on the contract buyout rules; its formula is not known</td><td><strong>Not known</strong></td></tr><tr><td><strong>Retained salary</strong></td><td>A team may retain part of a traded player's salary, within limits</td><td>The Editor setting exists but was never implemented (confirmed by the developer)</td><td><strong>Not possible</strong></td></tr><tr><td><strong>Cap hit</strong></td><td>The contract's average annual value</td><td>The contract's cap figure</td><td>yes</td></tr></tbody></table></div>
+<h2 id="s-what-i-left-out-on-purpose">What I left out on purpose</h2>
+<ul><li><strong>Values from the databases we tested.</strong> Every setting is named, not given; your database sets its own.</li><li><strong>Club wage budgets in leagues without a cap.</strong> That is finance; the finance guide covers budgets.</li><li><strong>Save-file details</strong> that only matter to outside tools.</li><li><strong>How any of this was measured.</strong> The page says what the game does, not how we read it.</li><li><strong>The players and clubs we tested on.</strong> The examples are rounded.</li><li><strong>A formula for the board's offer limit.</strong> Six data points are not enough to fit one honestly.</li></ul>
+<p class="foot">Version 1.0, 20 November 2026. Statements labelled "From the game's code" were read from the game's program logic for build 1669120 and may differ in other builds. Every setting named here is a database value.</p>
+</main>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var fmt=function(n){return '$'+Math.round(n).toLocaleString('en-US')};
+  var WHERE=[['roster','With the club'],['oneway','Minors, one-way'],['twoway','Minors, two-way'],['ir','On IR']];
+  var rows=$('k-rows');
+  function num(el){var v=parseFloat(el.value);return isFinite(v)&&v>0?v:0}
+  function addRow(name,cap,where){
+    var tr=document.createElement('tr');
+    var sel='<select aria-label="Where he plays">'+WHERE.map(function(w){return '<option value="'+w[0]+'"'+(w[0]===where?' selected':'')+'>'+w[1]+'</option>'}).join('')+'</select>';
+    tr.innerHTML='<td><input type="text" aria-label="Player" placeholder="Player" value=""></td>'+
+      '<td><input type="number" aria-label="Cap hit per season" inputmode="numeric" min="0" step="25000" value="'+(cap||0)+'"></td>'+
+      '<td>'+sel+'</td><td class="num c-chart">–</td><td class="num c-fin">–</td>'+
+      '<td><button type="button" aria-label="Remove this player">×</button></td>';
+    tr.querySelector('input[type=text]').value=name||'';
+    tr.querySelector('button').addEventListener('click',function(){tr.remove();calc()});
+    tr.addEventListener('input',calc);tr.addEventListener('change',calc);
+    rows.appendChild(tr);
+  }
+  function calc(){
+    var cap=num($('k-cap')),farm=num($('k-farm')),pen=num($('k-pen')),chart=pen,fin=pen,buried=0;
+    Array.prototype.forEach.call(rows.querySelectorAll('tr'),function(tr){
+      var c=num(tr.querySelector('input[type=number]')),w=tr.querySelector('select').value,ch=0,fi=0,label='';
+      if(w==='roster'){ch=c;fi=c;label='RP '}
+      else if(w==='oneway'){ch=Math.max(c-farm,0);label=ch>0?'BC ':'N/R '}
+      else if(w==='twoway'){label='N/R '}
+      else{label='IR '}
+      chart+=ch;fin+=fi;if(w==='oneway')buried+=ch;
+      tr.querySelector('.c-chart').textContent=label+fmt(ch);
+      tr.querySelector('.c-fin').textContent=fmt(fi);
+    });
+    var room=function(t){var r=cap-t;return r>=0?fmt(r)+' under the cap':fmt(-r)+' over the cap'};
+    $('k-chart').textContent=fmt(chart);$('k-fin').textContent=fmt(fin);
+    $('k-chart-room').textContent=room(chart);$('k-fin-room').textContent=room(fin);
+    $('k-chart-room').className='calc-sub'+(chart>cap?' over':'');$('k-fin-room').className='calc-sub'+(fin>cap?' over':'');
+    $('k-gap').textContent=buried>0?'The two totals differ by '+fmt(buried)+': the buried excess the chart counts and the Finances page leaves out.':'With no buried excess the two totals agree.';
+  }
+  var EX=[['Forward A',9000000,'roster'],['Forward B',8500000,'roster'],['Goalie A',8000000,'roster'],['Defence A',6500000,'roster'],['Forward C',6000000,'roster'],
+    ['Defence B',5750000,'roster'],['Forward D',4750000,'roster'],['Defence C',4500000,'roster'],['Forward E',3500000,'roster'],['Goalie B',2750000,'roster'],
+    ['Forward F',2250000,'roster'],['Defence D',1500000,'roster'],['Forward G',1250000,'roster'],['Defence E',1000000,'roster'],['Forward H',950000,'roster'],
+    ['Forward I',900000,'roster'],['Defence F',850000,'roster'],['Forward J',800000,'roster'],['Buried forward',6000000,'oneway'],['Buried defence',3500000,'oneway'],
+    ['Prospect, two-way',850000,'twoway'],['Injured defence',3500000,'ir']];
+  function example(){rows.innerHTML='';EX.forEach(function(r){addRow(r[0],r[1],r[2])});$('k-cap').value=100000000;$('k-farm').value=1200000;$('k-pen').value=1500000;calc()}
+  $('k-example').addEventListener('click',example);
+  $('k-clear').addEventListener('click',function(){rows.innerHTML='';addRow('',0,'roster');calc()});
+  $('k-add').addEventListener('click',function(){addRow('',0,'roster');calc()});
+  ['k-cap','k-farm','k-pen'].forEach(function(id){$(id).addEventListener('input',calc)});
+  example();
+})();
+
+</script>
+</body>
+</html>
